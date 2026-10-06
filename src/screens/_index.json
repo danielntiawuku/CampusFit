@@ -1,0 +1,102 @@
+{
+  "01": {
+    "file": "01_Student_Dashboard.tsx",
+    "component": "Stitch01_Student_Dashboard",
+    "source": "01_Student_Dashboard.html"
+  },
+  "02": {
+    "file": "02_FitClips_Inspiration.tsx",
+    "component": "Stitch02_FitClips_Inspiration",
+    "source": "02_FitClips_Inspiration.html"
+  },
+  "03": {
+    "file": "03_FitTrip_Explorer.tsx",
+    "component": "Stitch03_FitTrip_Explorer",
+    "source": "03_FitTrip_Explorer.html"
+  },
+  "04": {
+    "file": "04_Activity_Stats.tsx",
+    "component": "Stitch04_Activity_Stats",
+    "source": "04_Activity_Stats.html"
+  },
+  "05": {
+    "file": "05_CampusFit_Logo_Mark.tsx",
+    "component": "Stitch05_CampusFit_Logo_Mark",
+    "source": "05_CampusFit_Logo_Mark.html"
+  },
+  "06": {
+    "file": "06_CampusFit_Splash_Screen.tsx",
+    "component": "Stitch06_CampusFit_Splash_Screen",
+    "source": "06_CampusFit_Splash_Screen.html"
+  },
+  "07": {
+    "file": "07_Create_Account.tsx",
+    "component": "Stitch07_Create_Account",
+    "source": "07_Create_Account.html"
+  },
+  "08": {
+    "file": "08_Log_In.tsx",
+    "component": "Stitch08_Log_In",
+    "source": "08_Log_In.html"
+  },
+  "09": {
+    "file": "09_Student_Verification.tsx",
+    "component": "Stitch09_Student_Verification",
+    "source": "09_Student_Verification.html"
+  },
+  "10": {
+    "file": "10_OTP_Verification.tsx",
+    "component": "Stitch10_OTP_Verification",
+    "source": "10_OTP_Verification.html"
+  },
+  "11": {
+    "file": "11_Onboarding_Interests.tsx",
+    "component": "Stitch11_Onboarding_Interests",
+    "source": "11_Onboarding_Interests.html"
+  },
+  "12": {
+    "file": "12_FitTrip_Explorer_Map.tsx",
+    "component": "Stitch12_FitTrip_Explorer_Map",
+    "source": "12_FitTrip_Explorer_Map.html"
+  },
+  "13": {
+    "file": "13_FitClips_Vertical_Feed.tsx",
+    "component": "Stitch13_FitClips_Vertical_Feed",
+    "source": "13_FitClips_Vertical_Feed.html"
+  },
+  "14": {
+    "file": "14_FitTrip_Explorer_Search.tsx",
+    "component": "Stitch14_FitTrip_Explorer_Search",
+    "source": "14_FitTrip_Explorer_Search.html"
+  },
+  "15": {
+    "file": "15_Student_Profile.tsx",
+    "component": "Stitch15_Student_Profile",
+    "source": "15_Student_Profile.html"
+  },
+  "16": {
+    "file": "16_Club_Dashboard.tsx",
+    "component": "Stitch16_Club_Dashboard",
+    "source": "16_Club_Dashboard.html"
+  },
+  "17": {
+    "file": "17_Settings.tsx",
+    "component": "Stitch17_Settings",
+    "source": "17_Settings.html"
+  },
+  "18": {
+    "file": "18_Help_FAQ.tsx",
+    "component": "Stitch18_Help_FAQ",
+    "source": "18_Help_FAQ.html"
+  },
+  "19": {
+    "file": "19_Report_a_Problem.tsx",
+    "component": "Stitch19_Report_a_Problem",
+    "source": "19_Report_a_Problem.html"
+  },
+  "20": {
+    "file": "20_Submission_Success.tsx",
+    "component": "Stitch20_Submission_Success",
+    "source": "20_Submission_Success.html"
+  }
+}

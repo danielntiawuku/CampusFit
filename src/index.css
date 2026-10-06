@@ -1,0 +1,555 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---------------------------------------------------------------------------
+   Design tokens extracted from the 20 Google Stitch screens.
+   Material 3 palette + CampusFit brand accents.
+--------------------------------------------------------------------------- */
+:root {
+  --cf-bg: #faf5ee;
+  --cf-surface: #f7faf6;
+  --cf-card: #ffffff;
+  --cf-ink: #181c1a;
+  --cf-ink-variant: #3c4a41;
+  --cf-outline: #6c7b70;
+  --cf-outline-variant: #bbcabf;
+  --cf-mint: #1ecc8b;
+  --cf-mint-deep: #006c47;
+  --cf-amber: #f5a623;
+  --cf-purple: #c07eff;
+  --cf-ink-dark: #0e1210;
+  --cf-error: #ba1a1a;
+  --cf-radius-card: 20px;
+  --cf-safe-top: env(safe-area-inset-top, 0px);
+  --cf-safe-bottom: env(safe-area-inset-bottom, 0px);
+  color-scheme: light;
+}
+
+.dark {
+  --cf-bg: #0e1210;
+  --cf-surface: #151b18;
+  --cf-card: #1b221f;
+  --cf-ink: #e8efec;
+  --cf-ink-variant: #b9ccc4;
+  --cf-outline: #8fa39a;
+  --cf-outline-variant: #2b3833;
+  color-scheme: dark;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--cf-bg);
+  color: var(--cf-ink);
+  font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+  line-height: 1.35;
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior-y: none;
+}
+
+/* Material Symbols renders as ligatures; normalise sizing. */
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  font-feature-settings: 'liga';
+  -webkit-font-feature-settings: 'liga';
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  user-select: none;
+}
+
+@layer components {
+  /* The mobile app frame — mirrors the Stitch screens' 884px min height. */
+  .app-frame {
+    @apply relative mx-auto flex min-h-[100dvh] w-full max-w-[440px] flex-col;
+    background: var(--cf-bg);
+  }
+
+  .screen {
+    @apply flex flex-1 flex-col pb-28;
+    padding-top: var(--cf-safe-top);
+  }
+
+  .screen-pad {
+    @apply px-5;
+  }
+
+  .card {
+    border-radius: var(--cf-radius-card);
+    background: var(--cf-card);
+    box-shadow: 0 1px 3px rgba(24, 28, 26, 0.06), 0 1px 2px rgba(24, 28, 26, 0.04);
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-6 text-title-md font-semibold transition;
+    height: 52px;
+    background: var(--cf-mint);
+    color: #06231a;
+  }
+  .btn-primary:hover {
+    filter: brightness(0.96);
+  }
+  .btn-primary:active {
+    transform: translateY(1px);
+  }
+  .btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-6 text-title-md font-semibold transition;
+    height: 52px;
+    background: transparent;
+    color: var(--cf-ink);
+    border: 1.5px solid var(--cf-outline-variant);
+  }
+  .btn-ghost:hover {
+    background: rgba(24, 28, 26, 0.04);
+  }
+
+  .field {
+    @apply w-full rounded-2xl px-4 text-body-md outline-none transition;
+    height: 54px;
+    background: var(--cf-card);
+    border: 1.5px solid var(--cf-outline-variant);
+    color: var(--cf-ink);
+  }
+  .field::placeholder {
+    color: var(--cf-outline);
+  }
+  .field:focus {
+    border-color: var(--cf-mint);
+    box-shadow: 0 0 0 3px rgba(30, 204, 139, 0.18);
+  }
+
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full px-3.5 text-label-md font-medium transition;
+    height: 36px;
+    background: var(--cf-card);
+    border: 1.5px solid var(--cf-outline-variant);
+    color: var(--cf-ink-variant);
+  }
+  .chip[data-active='true'] {
+    background: var(--cf-mint);
+    border-color: var(--cf-mint);
+    color: #06231a;
+  }
+
+  .bottom-nav {
+    @apply fixed bottom-0 left-1/2 z-40 flex w-full max-w-[440px] -translate-x-1/2 items-center justify-around;
+    background: var(--cf-card);
+    box-shadow: 0 -2px 16px rgba(24, 28, 26, 0.08);
+    height: calc(68px + var(--cf-safe-bottom));
+    padding-bottom: var(--cf-safe-bottom);
+    border-top: 1px solid var(--cf-outline-variant);
+  }
+
+  .nav-item {
+    @apply relative flex flex-col items-center justify-center gap-0.5 text-label-sm transition;
+    min-width: 56px;
+    height: 52px;
+    color: var(--cf-outline);
+  }
+  .nav-item[data-active='true'] {
+    color: var(--cf-mint-deep);
+  }
+  .dark .nav-item[data-active='true'] {
+    color: var(--cf-mint);
+  }
+  .nav-item[data-active='true']::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    width: 44px;
+    height: 3px;
+    border-radius: 0 0 3px 3px;
+    background: var(--cf-mint);
+  }
+
+  .skeleton {
+    @apply relative overflow-hidden rounded-card;
+    background: rgba(24, 28, 26, 0.06);
+  }
+  .skeleton::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.45), transparent);
+    animation: shimmer 1.4s infinite;
+  }
+
+  .topbar {
+    @apply sticky top-0 z-30 flex items-center gap-3 px-5;
+    padding-top: calc(var(--cf-safe-top) + 12px);
+    height: calc(64px + var(--cf-safe-top));
+    background: color-mix(in srgb, var(--cf-bg) 88%, transparent);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid transparent;
+  }
+}
+
+/* Progress ring (steps card) */
+.ring-track {
+  stroke: rgba(24, 28, 26, 0.09);
+}
+.ring-fill {
+  stroke: var(--cf-mint);
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Hide scrollbar on horizontal scrollers while keeping them scrollable */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* -------------------------------------------------------------------------
+   Component CSS ported from the <style> blocks of the 20 Stitch screens.
+   (Per-screen `body` rules are skipped — the app frame replaces <body>.)
+--------------------------------------------------------------------------- */
+
+/* 01 dashboard */
+.custom-shadow {
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+}
+.glass-purple {
+  background: rgba(126, 60, 187, 0.08);
+  backdrop-filter: blur(8px);
+}
+.circular-progress {
+  transition: stroke-dashoffset 0.8s ease-in-out;
+}
+
+/* 02 FitClips inspiration + 13 vertical feed (dark screens) */
+.feed-screen {
+  background-color: #0e1210;
+  color: #fff;
+}
+.video-container {
+  scroll-snap-type: y mandatory;
+  overflow-y: scroll;
+  height: 100vh;
+  scrollbar-width: none;
+}
+.video-container::-webkit-scrollbar {
+  display: none;
+}
+.video-slide {
+  scroll-snap-align: start;
+  height: 100vh;
+  width: 100%;
+  position: relative;
+}
+.glass-overlay {
+  background: linear-gradient(
+    0deg,
+    rgba(14, 18, 16, 0.9) 0%,
+    rgba(14, 18, 16, 0.4) 40%,
+    rgba(14, 18, 16, 0) 100%
+  );
+}
+.active-pill-shadow {
+  box-shadow: 0 0 20px rgba(64, 224, 157, 0.15);
+}
+
+/* 03 explorer */
+.map-gradient-overlay {
+  background: linear-gradient(
+    to bottom,
+    rgba(250, 245, 238, 0.8) 0%,
+    rgba(250, 245, 238, 0) 15%,
+    rgba(250, 245, 238, 0) 85%,
+    rgba(250, 245, 238, 1) 100%
+  );
+}
+.glass-panel {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* 04 activity stats */
+.chart-container {
+  height: 200px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+.bar-mint {
+  background-color: #1ecc8b;
+  width: 24px;
+  border-radius: 4px 4px 0 0;
+  transition: height 1s ease-out;
+}
+.bar-amber {
+  background-color: #feae2c;
+  width: 24px;
+  border-radius: 4px 4px 0 0;
+  transition: height 1s ease-out;
+}
+.glass-card {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(8px);
+}
+
+/* 06 splash */
+.kinetic-blob {
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  background: #f5a623;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.12;
+  top: -100px;
+  right: -50px;
+  z-index: 0;
+  animation: float-blob 10s ease-in-out infinite alternate;
+}
+@keyframes float-blob {
+  from {
+    transform: translate(0, 0) scale(1);
+  }
+  to {
+    transform: translate(-30px, 40px) scale(1.1);
+  }
+}
+.fade-in {
+  animation: fadeIn 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 07 create account */
+.input-shadow {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+input[type='checkbox']:checked {
+  background-color: #1ecc8b;
+  border-color: #1ecc8b;
+}
+
+/* 09 student verification */
+.card-border {
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+.active-selection {
+  border: 2px solid #1ecc8b;
+}
+.custom-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* 10 OTP */
+.otp-input:focus {
+  border-color: #1ecc8b;
+  box-shadow: 0 0 0 2px rgba(30, 204, 139, 0.1);
+  outline: none;
+}
+.warm-gradient {
+  background: radial-gradient(circle at top left, rgba(30, 204, 139, 0.05), transparent 40%),
+    radial-gradient(circle at bottom right, rgba(126, 60, 187, 0.05), transparent 40%);
+}
+
+/* 11 onboarding interests */
+.selection-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.selection-card.active {
+  border-color: #1ecc8b;
+  background-color: rgba(30, 204, 139, 0.08);
+}
+
+/* 12 map */
+.active-icon {
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.33);
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1.2);
+    opacity: 0;
+  }
+}
+.pulse-animation {
+  animation: pulse-ring 2s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
+}
+.glass-dark {
+  background: rgba(14, 18, 16, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* 13 vertical feed */
+.video-feed {
+  scroll-snap-type: y mandatory;
+  overflow-y: scroll;
+  height: calc(100vh - 140px);
+  scrollbar-width: none;
+}
+.video-feed::-webkit-scrollbar {
+  display: none;
+}
+.video-card {
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+.glow-green {
+  filter: drop-shadow(0 0 30px rgba(30, 204, 139, 0.3));
+}
+.glow-amber {
+  filter: drop-shadow(0 0 30px rgba(254, 174, 44, 0.3));
+}
+.glow-purple {
+  filter: drop-shadow(0 0 30px rgba(126, 60, 187, 0.3));
+}
+
+/* 14 search */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.kinetic-card {
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.kinetic-card:active {
+  transform: scale(0.97);
+}
+
+/* 15 profile */
+.glass-effect {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* 16 club dashboard */
+.soft-border {
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* 17 settings — iOS-style toggles */
+.ios-toggle:checked ~ .ios-toggle-dot {
+  transform: translateX(100%);
+  background-color: #ffffff;
+}
+.ios-toggle:checked ~ .ios-toggle-bg {
+  background-color: #1ecc8b;
+}
+.segmented-control-active {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* 18 help & FAQ accordion */
+.accordion-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out, padding 0.3s ease;
+}
+.accordion-item.active .accordion-content {
+  max-height: 200px;
+  padding-bottom: 16px;
+}
+.accordion-item.active .chevron-icon {
+  transform: rotate(180deg);
+}
+
+/* 19 report a problem */
+.kinetic-shadow {
+  box-shadow: 0 4px 20px -2px rgba(0, 108, 71, 0.05);
+}
+
+/* 20 submission success */
+.success-float {
+  animation: float-success 6s ease-in-out infinite;
+}
+@keyframes float-success {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+.scale-in {
+  animation: scaleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+@keyframes scaleIn {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Scanner (thesis gamification) */
+.scan-line {
+  animation: scan-sweep 2.2s ease-in-out infinite;
+}
+@keyframes scan-sweep {
+  0%,
+  100% {
+    transform: translateY(-64px);
+  }
+  50% {
+    transform: translateY(64px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
