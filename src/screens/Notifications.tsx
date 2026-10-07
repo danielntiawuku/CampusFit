@@ -73,7 +73,7 @@ export default function Notifications() {
   const visible = notices.filter(n => filter === 'all' || n.unread);
   const unreadCount = notices.filter(n => n.unread).length;
 
-  function open(id: string) {
+  function markRead(id: string) {
     setNotices(prev => prev.map(n => (n.id === id ? { ...n, unread: false } : n)));
   }
 
@@ -117,7 +117,7 @@ export default function Notifications() {
             <button
               key={notice.id}
               type="button"
-              onClick={() => open(notice.id)}
+              onClick={() => { markRead(notice.id); navigate(`/notifications/${notice.id}`); }}
               style={{ animationDelay: `${index * 60}ms` }}
               className={`card flex w-full items-start gap-sm p-md text-left animate-fade-up transition hover:shadow-card-lg active:scale-[0.99] ${
                 notice.unread ? 'ring-1 ring-primary-container/40' : ''

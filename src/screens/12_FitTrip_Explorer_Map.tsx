@@ -127,7 +127,7 @@ export default function Stitch12_FitTrip_Explorer_Map() {
 <p className="text-white/60 font-body-md">Quest active · North Loop</p>
 </div>
 <button onClick={() => navigate('/scan')} className="bg-tertiary text-white w-12 h-12 rounded-full flex items-center justify-center hover:scale-105 transition-transform active:scale-95">
-<span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>send</span>
+<span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>qr_code_scanner</span>
 </button>
 </div>
 <div className="flex gap-xs">
@@ -141,7 +141,7 @@ export default function Stitch12_FitTrip_Explorer_Map() {
 </div>
 </div>
 <button onClick={() => navigate('/scan')} className="w-full bg-tertiary hover:bg-tertiary/90 text-white font-label-md py-sm rounded-full transition-colors flex items-center justify-center gap-sm">
-                    Interact with Nearby FitTrips
+                    Scan nearby checkpoint
                 </button>
 </div>
 

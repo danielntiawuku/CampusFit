@@ -9,6 +9,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { fetchActivityStats } from '../lib/api';
+import { DEMO_TRIPS } from '../lib/data';
 import type { ActivityStats } from '../lib/types';
 
 export default function Stitch01_Student_Dashboard() {
@@ -84,8 +85,7 @@ export default function Stitch01_Student_Dashboard() {
 <p className="font-label-md text-label-md text-on-surface">Starting in 45 mins</p>
 <p className="font-label-sm text-label-sm text-on-surface-variant">Don't forget your water bottle!</p>
 </div>
-</div>
-<button onClick={() => navigate('/stats')} className="w-full py-sm bg-primary text-on-primary rounded-full font-label-md hover:opacity-90 active:scale-95 transition-all">
+</div>              <button onClick={() => navigate('/workout')} className="w-full py-sm bg-primary text-on-primary rounded-full font-label-md hover:opacity-90 active:scale-95 transition-all">
                         View Schedule
                     </button>
 </div>
@@ -106,19 +106,19 @@ export default function Stitch01_Student_Dashboard() {
 <div className="h-40 relative">
 <img className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="A cinematic, wide-angle photo of a scenic jogging path through a sun-drenched university campus park. Golden hour light filters through large oak trees onto a clean asphalt trail that curves around a calm pond. The atmosphere is peaceful, healthy, and vibrant, featuring the soft warm cream and mint green tones of the design system." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBRUtdwK6G6WPQBmIFggCUuj0uOj-GftdxFAjxlwn8AshxiuVanlfI3OWO67S-BEyVMDBdqHuRlF6hdgFeWGy_q2-JTXtk2j60zfEe7Ja6xnMMpXuyu6dXo5kpNWdZnL47z_oH2bJ3SWOmg8jlpo-bW4dYHhlVCeTQVaRyXg6B0KW2sC-HnZtwOAy8Mt0udG9lMoSirzwTqLwoMwpK8f9_Kr0c7HVaI38s3ofgs51B22VCDTmSgnbmG9lUgO69SRXF2wCFLIB8Gb2Us"/>
 <div className="absolute top-sm right-sm bg-tertiary-container text-on-tertiary-container px-sm py-xs rounded-full font-label-sm flex items-center gap-xs">
-<span className="material-symbols-outlined text-[16px]">groups</span> 1.2k
-                        </div>
+<span className="material-symbols-outlined text-[16px]">groups</span> {DEMO_TRIPS[0].participants_count.toLocaleString()}
+</div>
 </div>
 <div className="p-md bg-white">
-<h4 className="font-title-md text-title-md text-on-background">Sunset Lake Loop</h4>
+<h4 className="font-title-md text-title-md text-on-background">{DEMO_TRIPS[0].name}</h4>
 <div className="flex items-center gap-sm mt-xs">
 <div className="flex items-center gap-xs text-on-surface-variant">
 <span className="material-symbols-outlined text-[18px]">distance</span>
-<span className="font-label-md text-label-md">4.2 km</span>
+<span className="font-label-md text-label-md">{DEMO_TRIPS[0].distance_km} km</span>
 </div>
 <div className="flex items-center gap-xs text-on-surface-variant">
 <span className="material-symbols-outlined text-[18px]">trending_up</span>
-<span className="font-label-md text-label-md">Easy</span>
+<span className="font-label-md text-label-md">{DEMO_TRIPS[0].difficulty}</span>
 </div>
 </div>
 </div>
@@ -128,19 +128,19 @@ export default function Stitch01_Student_Dashboard() {
 <div className="h-40 relative">
 <img className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="An aerial view of a vibrant city park trail at dusk, with soft purple and blue ambient lighting highlighting a paved fitness track. Modern architectural campus buildings are visible in the distance, glowing with warm interior lights. The scene is clean, safe, and motivating, embodying a premium wellness aesthetic with high-end photography quality." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBlUs9MNeMXw0hTQoP-gbVnPEUcCNemAn4v9sYGotow8B36PQVUKHG7a5gzN9ocOUjQs_I7-WaQkAd2FMJFg7-LC_jluleZto_loM1YFbCm0oJtuUjyEiR7yX6mKihlaHbhmBDD7zHcUDuz8fc4e56rPhzDMR3N_Pe9rvKXzDN6lJ9ILAOiZNuaNyWUlj4rnWiYa8i2n8Q9RZghCbgb-n0fQgR449ti3V-SRn0YrEzdUY0DxKnLlVIITs1FDfyVMMVBErtfFF8MZa4r"/>
 <div className="absolute top-sm right-sm bg-tertiary-container text-on-tertiary-container px-sm py-xs rounded-full font-label-sm flex items-center gap-xs">
-<span className="material-symbols-outlined text-[16px]">groups</span> 840
-                        </div>
+<span className="material-symbols-outlined text-[16px]">groups</span> {DEMO_TRIPS[1].participants_count.toLocaleString()}
+</div>
 </div>
 <div className="p-md bg-white">
-<h4 className="font-title-md text-title-md text-on-background">The Quad Sprint</h4>
+<h4 className="font-title-md text-title-md text-on-background">{DEMO_TRIPS[1].name}</h4>
 <div className="flex items-center gap-sm mt-xs">
 <div className="flex items-center gap-xs text-on-surface-variant">
 <span className="material-symbols-outlined text-[18px]">distance</span>
-<span className="font-label-md text-label-md">2.8 km</span>
+<span className="font-label-md text-label-md">{DEMO_TRIPS[1].distance_km} km</span>
 </div>
 <div className="flex items-center gap-xs text-on-surface-variant">
 <span className="material-symbols-outlined text-[18px]">trending_up</span>
-<span className="font-label-md text-label-md">Medium</span>
+<span className="font-label-md text-label-md">{DEMO_TRIPS[1].difficulty}</span>
 </div>
 </div>
 </div>

@@ -37,6 +37,8 @@ import ForgotPassword from './screens/ForgotPassword';
 import EditProfile from './screens/EditProfile';
 import RecordClip from './screens/RecordClip';
 import Privacy from './screens/Privacy';
+/* detail screens are routed by their parent screens via links/buttons;
+   the imports are kept here to ensure the modules are compiled in. */
 
 /** Routes reachable without an account. */
 const PUBLIC_ROUTES = [

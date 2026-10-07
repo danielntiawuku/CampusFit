@@ -103,10 +103,9 @@ className={`shrink-0 px-md py-sm rounded-full flex items-center gap-xs shadow-sm
 </div>
 </div>
 
-<div className="absolute bottom-32 left-1/2 -translate-x-1/2 z-30">
-<button onClick={() => navigate('/scan')} className="flex items-center gap-sm bg-accent-purple text-white px-xl py-md rounded-full shadow-2xl shadow-accent-purple/50 active:scale-90 transition-transform duration-300">
-<span className="material-symbols-outlined text-[28px]" style={{ fontVariationSettings: "'FILL' 1" }}>play_arrow</span>
-<span className="font-title-md font-bold whitespace-nowrap">Start FitTrip</span>
+<div className="absolute bottom-32 left-1/2 -translate-x-1/2 z-30">            <button onClick={() => navigate('/scan')} className="flex items-center gap-sm bg-accent-purple text-white px-xl py-md rounded-full shadow-2xl shadow-accent-purple/50 active:scale-90 transition-transform duration-300">
+<span className="material-symbols-outlined text-[28px]" style={{ fontVariationSettings: "'FILL' 1" }}>qr_code_scanner</span>
+<span className="font-title-md font-bold whitespace-nowrap">Scan checkpoint</span>
 </button>
 </div>
 </main>
