@@ -8,29 +8,37 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fetchFitClips } from '../lib/api';
-import type { FitClip } from '../lib/types';
-
-/** Play/pause overlay for a clip. */
-function ClipPlay() {
+import type { FitClip } from '../lib/types';/** Play/pause overlay for a clip. Tapping toggles inline playback; the open-in-new button takes you to the clip's own screen. */
+function ClipPlay({ clipId, navigate }: { clipId: string; navigate: (to: string) => void }) {
   const [playing, setPlaying] = useState(false);
   return (
-    <button
-      onClick={() => setPlaying(v => !v)}
-      aria-label={playing ? 'Pause clip' : 'Play clip'}
-      className="absolute inset-0 flex items-center justify-center z-20"
-    >
-      <span
-        className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white active:scale-90 transition-all"
-        style={{ opacity: playing ? 0.35 : 1 }}
+    <div className="absolute inset-0 z-20 flex">
+      <button
+        onClick={() => setPlaying(v => !v)}
+        aria-label={playing ? 'Pause clip' : 'Play clip'}
+        className="absolute inset-0 flex items-center justify-center"
       >
         <span
-          className="material-symbols-outlined text-[40px]"
-          style={{ fontVariationSettings: "'FILL' 1" }}
+          className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white active:scale-90 transition-all"
+          style={{ opacity: playing ? 0.35 : 1 }}
         >
-          {playing ? 'pause' : 'play_arrow'}
+          <span
+            className="material-symbols-outlined text-[40px]"
+            style={{ fontVariationSettings: "'FILL' 1" }}
+          >
+            {playing ? 'pause' : 'play_arrow'}
+          </span>
         </span>
-      </span>
-    </button>
+      </button>
+      <button
+        type="button"
+        onClick={() => navigate(`/clip/${clipId}`)}
+        aria-label="Open clip details"
+        className="relative ml-auto h-9 w-9 p-1 -mr-1 -mt-1"
+      >
+        <span className="material-symbols-outlined text-white/70 hover:text-white active:scale-90 transition-transform" style={{ fontVariationSettings: "'FILL' 1" }}>open_in_new</span>
+      </button>
+    </div>
   );
 }
 
@@ -99,8 +107,7 @@ export default function Stitch13_FitClips_Vertical_Feed() {
 {clips.map((clip) => (
   <section
     key={clip.id}
-    onClick={() => navigate(`/clip/${clip.id}`)}
-    className="video-card relative w-full h-[618px] rounded-[20px] overflow-hidden bg-surface-container-highest/5 border border-white/5 cursor-pointer"
+    className="video-card relative w-full h-[618px] rounded-[20px] overflow-hidden bg-surface-container-highest/5 border border-white/5"
   >
     <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/80 z-10"></div>
     <div className="absolute inset-0 flex items-center justify-center glow-green">
@@ -127,7 +134,7 @@ export default function Stitch13_FitClips_Vertical_Feed() {
         )}
       </div>
     </div>
-    <ClipPlay />
+    <ClipPlay clipId={clip.id} navigate={navigate} />
     <div className="absolute bottom-0 left-0 w-full p-md z-20 flex justify-between items-end">
       <div className="flex flex-col gap-xs max-w-[70%]">
         <div className="flex items-center gap-xs">
@@ -160,7 +167,7 @@ export default function Stitch13_FitClips_Vertical_Feed() {
 </div>
 </div>
 
-<ClipPlay />
+<ClipPlay clipId="f1" navigate={navigate} />
 
 <div className="absolute top-md right-md z-20 bg-black/40 backdrop-blur-md px-xs py-base rounded-lg border border-white/10">
 <span className="font-label-sm text-label-sm text-white">0:15</span>
@@ -193,7 +200,7 @@ export default function Stitch13_FitClips_Vertical_Feed() {
 <img className="w-full h-full object-cover opacity-60" alt="A close-up shot of a weightlifter's hands applying chalk in a high-end university gym. Golden sunset light streaming through windows creates a warm amber glow. Athletic, professional, minimalist mood." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAv8IaM0tIrqI4tMf7P9jndcG9A6pWVcRMVZlyjB8BLB5g6lmGw-AYCyosuhAxrttUREDhxgmo9r3gT8JilcuaiSIZwaPzIb_APfuqf18xyTeJozr87xmEAKOPEUqS6WhrLbLDI7FB_68lZNzpKB5CXIFLbNFflaCEKNMwUBX7BokjV-PmJPAq8kSl44Rd6_cBFTF_2AQqMsAPLbnLu5sAbERaqdV7NsMonTFA9VJ9YTKwxotJM5uO3fe8sepHYnf4tZc6tMICKf_RM"/>
 </div>
 </div>
-<ClipPlay />
+<ClipPlay clipId="f2" navigate={navigate} />
 <div className="absolute top-md right-md z-20 bg-black/40 backdrop-blur-md px-xs py-base rounded-lg border border-white/10">
 <span className="font-label-sm text-label-sm text-white">0:24</span>
 </div>
@@ -223,7 +230,7 @@ export default function Stitch13_FitClips_Vertical_Feed() {
 <img className="w-full h-full object-cover opacity-60" alt="A serene yoga studio at dusk with purple ambient lighting. A student is seen in a silhouette yoga pose. Soft, calm, meditative atmosphere with minimalist decor." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCAHYevenDSI_xsH-v3E9s8NuCmI73F7M41FMyN5n5C84UyTh-HCPXLx_1gM-T3DWdd0emgSvZk4N1FgcEaPTBm5HRMKcTTlAtQ4Lqu6UzYsmXPNzMS5xRIgC_bj0NqUnADWumIXl3kHzArfU0nyzbBCRE6-1-LHpt2HLOpxjcFEi1HkKLFSPvka1pF_VKNhxdPEojZKniHdb07ynEQcXUbZJiR5Yo8A76RSNZos40efQUxJ9UTG0Dn4RzRRFBfGc4_u81YZh5XcW3H"/>
 </div>
 </div>
-<ClipPlay />
+<ClipPlay clipId="f3" navigate={navigate} />
 <div className="absolute top-md right-md z-20 bg-black/40 backdrop-blur-md px-xs py-base rounded-lg border border-white/10">
 <span className="font-label-sm text-label-sm text-white">0:45</span>
 </div>

@@ -54,8 +54,7 @@ export default function Stitch02_FitClips_Inspiration() {
 <div className="flex items-center gap-sm">
 <div className="w-10 h-10 rounded-full border-2 border-primary-fixed overflow-hidden cursor-pointer" onClick={() => navigate('/profile')}>
 <img className="w-full h-full object-cover" alt="A professional headshot of a diverse university student smiling warmly, captured in soft natural lighting. The student wears athletic gear, and the background is a blurred university campus courtyard. The visual style is crisp, high-resolution, and matches a clean, modern wellness app aesthetic with vibrant yet natural color tones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAa754YOsmLGfY3XkkxovTgFpIxS9hvvfyxjqWpH-qzctSnnHVhB5FSQ2T2lNd3HvOkiVYdN5HdqtjQVZIuwcNa4zod4f59O0H7m_N903u-SJAcyyDyXkW8GKL3CmUkymFz7cJy3nmtDZaKzXOyv9ALq661-2ImxqbqZ_YXjB4d_Pp5ujIIzKSMntz2Ss47IgKctPNu3KcNzZGxOTjd3CpY_cAGxgD23w-hNVw-iTL_YLE4v6OGwB5k3VaG9qyTnRzwIUNHI5-1ljWe"/>
-</div>
-<h1 className="font-headline-lg-mobile text-headline-lg-mobile font-bold text-white">FitClips</h1>
+</div>          <h1 className="font-headline-lg-mobile text-headline-lg-mobile font-bold text-white">FitClips</h1>
 </div>
 <button onClick={() => navigate('/clips')} className="material-symbols-outlined text-white p-xs hover:opacity-80 transition-opacity scale-95 active:scale-90 transition-transform">
             grid_view

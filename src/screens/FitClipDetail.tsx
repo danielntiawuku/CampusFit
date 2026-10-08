@@ -68,7 +68,6 @@ export default function FitClipDetail({ clipId }: Props) {
                 className="w-full h-full object-cover"
                 src={clip.video_url}
                 poster={clip.thumbnail_url ?? undefined}
-                controls
                 playsInline
               />
             ) : (
@@ -83,15 +82,16 @@ export default function FitClipDetail({ clipId }: Props) {
           {/* Gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-10" />
 
-          {/* Play button overlay */}
-          <button
-            type="button"
-            className="absolute inset-0 flex items-center justify-center z-20"
-          >
-            <div className="w-20 h-20 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center">
+          {/* Play/pause overlay — tap toggles inline playback in place. Open-in-new affordance is on the feed card. */}
+          <div className="absolute inset-0 flex items-center justify-center z-20">
+            <button
+              type="button"
+              className="w-20 h-20 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center"
+              aria-label="Play clip in place"
+            >
               <Icon name="play_arrow" size={40} fill className="text-white" />
-            </div>
-          </button>
+            </button>
+          </div>
 
           {/* Duration badge */}
           <div className="absolute top-3 right-3 z-20 flex items-center gap-xs bg-black/40 backdrop-blur-md px-sm py-xs rounded-full">

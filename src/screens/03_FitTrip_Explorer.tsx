@@ -9,9 +9,9 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const FILTERS = [
-  { label: 'Main Loop', icon: 'directions_run', fill: true },
-  { label: 'Arboretum', icon: 'forest', fill: false },
-  { label: 'The Ridge', icon: 'bike_dock', fill: false },
+  { label: 'Legon Loop', icon: 'directions_run', fill: true },
+  { label: 'Botanic Garden', icon: 'forest', fill: false },
+  { label: 'Science Ridge', icon: 'bike_dock', fill: false },
 ];
 
 export default function Stitch03_FitTrip_Explorer() {
@@ -26,7 +26,7 @@ export default function Stitch03_FitTrip_Explorer() {
 <div className="w-10 h-10 rounded-full border-2 border-primary overflow-hidden cursor-pointer transition active:scale-95" onClick={() => navigate('/profile')}>
 <img className="w-full h-full object-cover" alt="A friendly close-up portrait of a diverse university student with a bright, welcoming smile, set against a soft-focus campus background in morning golden hour light. The image has a clean, professional aesthetic with high-key lighting and natural textures that align with a modern wellness brand." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCw3RCt-oz53N2yFhxEoNiNuPs7BCKR9EVzzDMbd97O67uQTYCYMxdMNBNTTff68q86DUUtqJTWrNiZjSmlVC_FdOwRGqdkIHZobRg4nTtkrTX0L-a2H7FXvxP0Qa9DObxFEoSKor0g12TUlnmQ4xVTpxMFEQGyccEbG85LeV_FVUyyxt-562yv7Xq_aXjvaHD3jBjfspWC2Gd-bO8L8jvejD8G8on8zNMgPsu3aHVPJqIsffFb01KUAhhkqge4whx_B-ksFu7ivi7X"/>
 </div>
-<h1 className="font-headline-lg-mobile text-headline-lg-mobile font-bold text-primary">FitTrip</h1>
+<h1 className="font-headline-lg-mobile text-headline-lg-mobile font-bold text-primary">Campus Spots</h1>
 </div>
 <button onClick={() => navigate('/notifications')} className="w-10 h-10 flex items-center justify-center rounded-full bg-surface-container hover:opacity-80 transition-opacity active:scale-90">
 <span className="material-symbols-outlined text-on-surface-variant">notifications</span>
@@ -81,7 +81,7 @@ export default function Stitch03_FitTrip_Explorer() {
 
 <div onClick={() => navigate('/explore/search')} className="w-full glass-panel h-14 rounded-2xl flex items-center px-md border border-white/30 shadow-md cursor-text transition hover:shadow-lg">
 <span className="material-symbols-outlined text-on-surface-variant mr-sm">search</span>
-<input className="bg-transparent border-none focus:ring-0 w-full font-body-md text-on-background placeholder:text-on-surface-variant/60" placeholder="Find a route or friend..." type="text"/>
+<input className="bg-transparent border-none focus:ring-0 w-full font-body-md text-on-background placeholder:text-on-surface-variant/60" placeholder="Find a spot or friend..." type="text"/>
 <span className="material-symbols-outlined text-on-surface-variant">tune</span>
 </div>
 
@@ -105,7 +105,7 @@ className={`shrink-0 px-md py-sm rounded-full flex items-center gap-xs shadow-sm
 
 <div className="absolute bottom-32 left-1/2 -translate-x-1/2 z-30">            <button onClick={() => navigate('/scan')} className="flex items-center gap-sm bg-accent-purple text-white px-xl py-md rounded-full shadow-2xl shadow-accent-purple/50 active:scale-90 transition-transform duration-300">
 <span className="material-symbols-outlined text-[28px]" style={{ fontVariationSettings: "'FILL' 1" }}>qr_code_scanner</span>
-<span className="font-title-md font-bold whitespace-nowrap">Scan checkpoint</span>
+<span className="font-title-md font-bold whitespace-nowrap">Scan a spot</span>
 </button>
 </div>
 </main>

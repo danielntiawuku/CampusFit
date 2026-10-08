@@ -105,7 +105,7 @@ export default function Stitch12_FitTrip_Explorer_Map() {
 </div>
 <div className="flex flex-col">
 <span className="text-white font-label-sm leading-none opacity-60">Near</span>
-<span className="text-white font-label-md leading-none">Main Quad</span>
+<span className="text-white font-label-md leading-none">Legon Loop</span>
 </div>
 </div>
 <div className="glass-dark rounded-full px-sm py-xs flex items-center gap-xs">
@@ -113,7 +113,7 @@ export default function Stitch12_FitTrip_Explorer_Map() {
 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-tertiary-container opacity-75"></span>
 <span className="relative inline-flex rounded-full h-2 w-2 bg-tertiary-container"></span>
 </span>
-<span className="text-white font-label-md">2 FitTrips nearby</span>
+<span className="text-white font-label-md">2 campus spots nearby</span>
 </div>
 </header>
 <main className="flex-1"></main>
@@ -123,8 +123,8 @@ export default function Stitch12_FitTrip_Explorer_Map() {
 <div className="glass-dark rounded-[24px] p-md mb-md shadow-2xl flex flex-col gap-md">
 <div className="flex justify-between items-center">
 <div>
-<h2 className="text-white font-title-md">Exploring North Loop</h2>
-<p className="text-white/60 font-body-md">Quest active · North Loop</p>
+<h2 className="text-white font-title-md">Exploring Legon Loop</h2>
+<p className="text-white/60 font-body-md">Quest active · Legon Loop</p>
 </div>
 <button onClick={() => navigate('/scan')} className="bg-tertiary text-white w-12 h-12 rounded-full flex items-center justify-center hover:scale-105 transition-transform active:scale-95">
 <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>qr_code_scanner</span>
@@ -141,7 +141,7 @@ export default function Stitch12_FitTrip_Explorer_Map() {
 </div>
 </div>
 <button onClick={() => navigate('/scan')} className="w-full bg-tertiary hover:bg-tertiary/90 text-white font-label-md py-sm rounded-full transition-colors flex items-center justify-center gap-sm">
-                    Scan nearby checkpoint
+                    Scan nearby spot
                 </button>
 </div>
 

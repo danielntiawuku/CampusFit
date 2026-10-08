@@ -22,7 +22,7 @@ const QUICK_LINKS: { to: string; label: string; icon: string; tint: string }[] =
   { to: '/challenges', label: 'Challenges', icon: 'emoji_events', tint: 'bg-secondary-container/15 text-secondary' },
   { to: '/leaderboard', label: 'Ranking', icon: 'leaderboard', tint: 'bg-tertiary-container/15 text-tertiary' },
   { to: '/badges', label: 'Badges', icon: 'workspace_premium', tint: 'bg-primary-container/15 text-primary' },
-  { to: '/record', label: 'Post clip', icon: 'videocam', tint: 'bg-secondary-container/15 text-secondary' },
+  { to: '    /record', label: 'Record clip', icon: 'videocam', tint: 'bg-secondary-container/15 text-secondary' },
 ];
 
 export default function Stitch01_Student_Dashboard() {
