@@ -7,8 +7,10 @@ insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_typ
 values ('avatars', 'avatars', true, 5242880, ARRAY['image/jpeg', 'image/png', 'image/webp'])
 on conflict (id) do nothing;
 
+-- video/webm is what MediaRecorder produces in Chrome/Firefox, so the
+-- in-app recorder can actually post its output.
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
-values ('fitclip-videos', 'fitclip-videos', true, 104857600, ARRAY['video/mp4', 'video/quicktime', 'video/x-msvideo'])
+values ('fitclip-videos', 'fitclip-videos', true, 104857600, ARRAY['video/mp4', 'video/quicktime', 'video/x-msvideo', 'video/webm'])
 on conflict (id) do nothing;
 
 -- No RLS policies needed on storage.objects for public buckets -

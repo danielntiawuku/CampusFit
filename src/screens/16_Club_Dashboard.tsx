@@ -8,33 +8,25 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { pointsForLevel } from '../lib/data';
-import { fetchClubs, fetchLeaderboard } from '../lib/api';
-import type { Club, LeaderboardRow } from '../lib/types';
+import { fetchChallenges, fetchClubs, fetchLeaderboard } from '../lib/api';
+import type { Challenge, Club, LeaderboardRow } from '../lib/types';
 
-interface Challenge {
-  id: string;
-  title: string;
-  subtitle: string;
-  icon: string;
-  pct: number;
-  active: boolean;
+/** Days remaining before a challenge ends (0 once it is over). */
+function daysLeft(endsAt: string): number {
+  const ms = new Date(endsAt).getTime() - Date.now();
+  return Math.max(0, Math.ceil(ms / 86400000));
 }
 
-const CHALLENGES: Challenge[] = [
-  { id: 'morning-miles', title: 'Morning Miles', subtitle: 'Ends in 2 days', icon: 'wb_sunny', pct: 75, active: true },
-  { id: 'weekend-warrior', title: 'Weekend Warrior', subtitle: 'Starts tomorrow', icon: 'fitness_center', pct: 20, active: false },
-];
-
-const NEW_CHALLENGES: Omit<Challenge, 'id'>[] = [
-  { title: 'Streak Sprint', subtitle: 'Starts today', icon: 'whatshot', pct: 0, active: true },
-  { title: 'Checkpoint Chase', subtitle: 'Starts Friday', icon: 'qr_code_scanner', pct: 0, active: true },
-  { title: 'Sunset 5K', subtitle: 'Starts next week', icon: 'directions_run', pct: 0, active: false },
-];
+const METRIC_SHORT: Record<Challenge['metric'], string> = {
+  scans: 'scans',
+  points: 'pts',
+  distance_km: 'km',
+  checkpoints: 'spots',
+};
 
 export default function Stitch16_Club_Dashboard() {
   const navigate = useNavigate();
-  const [mounted, setMounted] = useState(false);
-  const [extra, setExtra] = useState<Challenge[]>([]);
+  const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [clubs, setClubs] = useState<Club[]>([]);
   const [board, setBoard] = useState<LeaderboardRow[]>([]);
   const club = clubs[0];
@@ -48,56 +40,59 @@ export default function Stitch16_Club_Dashboard() {
   });
 
   useEffect(() => {
-    const t = window.setTimeout(() => setMounted(true), 120);
-    return () => window.clearTimeout(t);
-  }, []);
-
-  useEffect(() => {
     fetchClubs()
       .then(setClubs)
       .catch(() => setClubs([]));
     fetchLeaderboard()
       .then(setBoard)
       .catch(() => setBoard([]));
+    fetchChallenges()
+      .then(setChallenges)
+      .catch(() => setChallenges([]));
   }, []);
-
-  function addChallenge() {
-    const template = NEW_CHALLENGES[extra.length % NEW_CHALLENGES.length];
-    setExtra(prev => [...prev, { ...template, id: `challenge-${Date.now()}` }]);
-  }
 
   const handleMemberClick = () => {
     navigate('/leaderboard');
   };
 
   function renderChallenge(challenge: Challenge) {
+    const days = daysLeft(challenge.ends_at);
+    const icon =
+      challenge.metric === 'distance_km'
+        ? 'directions_run'
+        : challenge.metric === 'points'
+          ? 'stars'
+          : 'qr_code_scanner';
     return (
-      <div
+      <button
         key={challenge.id}
-        className="min-w-[280px] bg-surface-container-lowest soft-border rounded-2xl p-lg space-y-md flex-shrink-0 animate-fade-up"
+        type="button"
+        onClick={() => navigate(`/challenges/${challenge.id}`)}
+        className="min-w-[260px] bg-surface-container-lowest soft-border rounded-2xl p-lg space-y-md flex-shrink-0 animate-fade-up text-left transition hover:shadow-card-lg active:scale-[0.99]"
       >
         <div className="flex justify-between items-start">
           <div>
             <h4 className="font-body-lg text-body-lg font-bold text-on-surface">{challenge.title}</h4>
-            <p className="font-label-sm text-label-sm text-on-surface-variant">{challenge.subtitle}</p>
+            <p className="font-label-sm text-label-sm text-on-surface-variant">
+              {days > 0 ? `Ends in ${days}d` : 'Ended'} · {challenge.club?.name ?? 'Open challenge'}
+            </p>
           </div>
-          <span className={`material-symbols-outlined ${challenge.active ? 'text-tertiary' : 'text-secondary'}`}>
-            {challenge.icon}
+          <span className={`material-symbols-outlined ${days > 0 ? 'text-tertiary' : 'text-secondary'}`}>
+            {icon}
           </span>
         </div>
         <div className="space-y-xs">
           <div className="flex justify-between font-label-sm text-label-sm">
-            <span>Progress</span>
-            <span className={challenge.active ? 'text-primary' : 'text-on-surface-variant'}>{challenge.pct}%</span>
+            <span>Goal</span>
+            <span className="text-primary">
+              {challenge.target_value} {METRIC_SHORT[challenge.metric]} · +{challenge.points_reward}
+            </span>
           </div>
-          <div className="h-2 w-full bg-surface-container-high rounded-full overflow-hidden">
-            <div
-              className={`h-full rounded-full transition-all duration-700 ${challenge.active ? 'bg-primary-container' : 'bg-outline-variant'}`}
-              style={{ width: mounted ? `${challenge.pct}%` : '0%' }}
-            />
-          </div>
+          <p className="font-label-sm text-label-sm text-on-surface-variant truncate">
+            {challenge.description || 'Tap for details'}
+          </p>
         </div>
-      </div>
+      </button>
     );
   }
 
@@ -184,14 +179,14 @@ export default function Stitch16_Club_Dashboard() {
           <div className="flex items-center justify-between">
             <h3 className="font-title-md text-title-md text-on-surface">Club Challenges</h3>
             <button
-              onClick={() => navigate('/leaderboard')}
+              onClick={() => navigate('/challenges')}
               className="text-primary font-label-md text-label-md"
             >
               View all challenges
             </button>
           </div>
           <div className="flex gap-md overflow-x-auto no-scrollbar pb-xs -mx-container-padding px-container-padding">
-            {[...CHALLENGES, ...extra].map(renderChallenge)}
+            {[...challenges].map(renderChallenge)}
           </div>
         </section>
 
@@ -250,7 +245,7 @@ export default function Stitch16_Club_Dashboard() {
       </main>
 
       <button
-        onClick={addChallenge}
+        onClick={() => navigate('/challenges/new')}
         className="fixed bottom-24 right-4 sm:right-6 md:right-8 py-md px-4 sm:px-5 md:px-6 bg-primary-container text-on-primary-container rounded-full shadow-lg active:scale-90 duration-200 z-50 flex items-center gap-xs"
       >
         <span className="material-symbols-outlined">add</span>

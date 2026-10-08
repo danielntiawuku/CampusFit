@@ -112,6 +112,22 @@ export interface ProblemReport {
   created_at: string;
 }
 
+/** A club/community challenge with a measurable goal and a reward. */
+export interface Challenge {
+  id: string;
+  club_id: string | null;
+  title: string;
+  description: string;
+  metric: 'scans' | 'points' | 'distance_km' | 'checkpoints';
+  target_value: number;
+  points_reward: number;
+  starts_at: string;
+  ends_at: string;
+  created_by: string;
+  created_at: string;
+  club?: Pick<Club, 'id' | 'name' | 'color'> | null;
+}
+
 /** Dashboard headline metrics. */
 export interface ActivityStats {
   /** Steps taken today. */

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Alert, ScreenHeader, Icon } from '../components/ui';
 import { useAuth } from '../context/AuthContext';
-import { uploadFitClipVideo } from '../lib/api';
+import { createFitClip, uploadFitClipVideo } from '../lib/api';
 
 /**
  * Production screen not present in the Stitch export — the capture flow the
@@ -113,8 +113,8 @@ export default function RecordClip() {
         setError('Could not upload video.');
         return;
       }
-      // In production, we would insert into the fitclips table here.
-      // For now, re-fetch the feed so the next load shows real data if it was created.
+      // Persist the row so the feed actually shows this clip on the next load.
+      await createFitClip(profile.id, videoUrl, caption.trim() || 'CampusFit clip');
       setPosted(true);
       streamRef.current?.getTracks().forEach(track => track.stop());
       chunksRef.current = [];

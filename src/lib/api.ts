@@ -12,6 +12,7 @@ import {
 } from './data';
 import type {
   Badge,
+  Challenge,
   Checkpoint,
   CheckpointScan,
   Club,
@@ -162,6 +163,75 @@ export async function fetchClubs(): Promise<Club[]> {
   const { data, error } = await sb.from('clubs').select('*');
   if (error) throw error;
   return (data ?? []) as Club[];
+}
+
+/* ------------------------------------------------------------- challenges */
+
+export interface NewChallenge {
+  title: string;
+  description: string;
+  clubId: string | null;
+  metric: Challenge['metric'];
+  targetValue: number;
+  pointsReward: number;
+  startsAt: string;
+  endsAt: string;
+}
+
+export async function fetchChallenges(): Promise<Challenge[]> {
+  const sb = supabaseOrNull();
+  if (!sb) return DEMO_CLUBS.map((club, index) => ({
+    id: `challenge-${index}`,
+    club_id: club.id,
+    title: `${club.name} week`,
+    description: 'Complete the target before the deadline to earn the reward.',
+    metric: 'scans',
+    target_value: 10,
+    points_reward: 100,
+    starts_at: new Date().toISOString(),
+    ends_at: new Date(Date.now() + 7 * 86400000).toISOString(),
+    created_by: 'demo',
+    created_at: new Date().toISOString(),
+    club,
+  }));
+  const { data, error } = await sb
+    .from('challenges')
+    .select('*, club:clubs(id, name, color)')
+    .order('ends_at', { ascending: true });
+  if (error) throw error;
+  return (data ?? []) as Challenge[];
+}
+
+export async function createChallenge(
+  userId: string,
+  input: NewChallenge
+): Promise<string> {
+  const sb = supabaseOrNull();
+  if (!sb) return `local-${Date.now()}`;
+  const { data, error } = await sb
+    .from('challenges')
+    .insert({
+      club_id: input.clubId,
+      title: input.title,
+      description: input.description,
+      metric: input.metric,
+      target_value: input.targetValue,
+      points_reward: input.pointsReward,
+      starts_at: input.startsAt,
+      ends_at: input.endsAt,
+      created_by: userId,
+    })
+    .select('id')
+    .single();
+  if (error) throw error;
+  return (data as { id: string }).id;
+}
+
+export async function deleteChallenge(id: string): Promise<void> {
+  const sb = supabaseOrNull();
+  if (!sb) return;
+  const { error } = await sb.from('challenges').delete().eq('id', id);
+  if (error) throw error;
 }
 
 /* ------------------------------------------------------------ activity */
@@ -396,6 +466,29 @@ export async function uploadFitClipVideo(
 }
 
 /* --------------------------------------------------------- social: follow + join */
+/** Insert a newly recorded FitClip so it actually appears in the feed. */
+export async function createFitClip(
+  userId: string,
+  videoUrl: string,
+  caption: string,
+  thumbnailUrl: string | null = null
+): Promise<string | null> {
+  const sb = supabaseOrNull();
+  if (!sb) return null;
+  const { data, error } = await sb
+    .from('fitclips')
+    .insert({
+      user_id: userId,
+      video_url: videoUrl,
+      caption,
+      thumbnail_url: thumbnailUrl,
+    })
+    .select('id')
+    .single();
+  if (error) throw error;
+  return (data as { id: string } | null)?.id ?? null;
+}
+
 export async function joinClub(clubId: string, userId: string): Promise<void> {
   const sb = supabaseOrNull();
   if (!sb) return;

@@ -39,6 +39,8 @@ import EditProfile from './screens/EditProfile';
 import RecordClip from './screens/RecordClip';
 import Privacy from './screens/Privacy';
 import ChallengesDashboard from './screens/ChallengesDashboard';
+import CreateChallenge from './screens/CreateChallenge';
+import ChallengeDetail from './screens/ChallengeDetail';
 import WorkoutSchedule from './screens/WorkoutSchedule';
 import AdminReports from './screens/AdminReports';
 import AdminCheckpoints from './screens/AdminCheckpoints';
@@ -73,6 +75,10 @@ function FitTripDetailRoute() {
 function WorkoutDetailRoute() {
   const { id } = useParams<{ id: string }>();
   return <WorkoutDetail tripId={id} />;
+}
+function ChallengeDetailRoute() {
+  const { id } = useParams<{ id: string }>();
+  return <ChallengeDetail challengeId={id ?? ''} />;
 }
 
 /** Routes reachable without an account. */
@@ -129,6 +135,7 @@ export default function App() {
     '/explore/map',
     '/explore/search',
     '/notifications',
+    '/challenges',
     '/edit-profile',
     '/privacy',
     '/record',
@@ -142,6 +149,7 @@ export default function App() {
     '/clip/',
     '/checkpoint/',
     '/workout/',
+    '/challenges/',
     '/admin/',
   ];
   const showNav =
@@ -193,6 +201,8 @@ export default function App() {
           <Route path="/admin/students" element={<RequireAuth><AdminStudents /></RequireAuth>} />
           <Route path="/admin/qr" element={<RequireAuth><AdminCheckpoints /></RequireAuth>} />
           <Route path="/challenges" element={<RequireAuth><ChallengesDashboard /></RequireAuth>} />
+          <Route path="/challenges/new" element={<RequireAuth><CreateChallenge /></RequireAuth>} />
+          <Route path="/challenges/:id" element={<RequireAuth><ChallengeDetailRoute /></RequireAuth>} />
           <Route path="/workout" element={<RequireAuth><WorkoutSchedule /></RequireAuth>} />
           <Route path="/map" element={<RequireAuth><MapboxDashboard /></RequireAuth>} />
 

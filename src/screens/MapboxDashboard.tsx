@@ -50,8 +50,9 @@ export default function MapboxDashboard() {
         mapboxgl.accessToken = token;
         const m = new mapboxgl.Map({
           container: mapContainer.current!,
-          style: 'mapbox://styles/mapbox/campus-vt2z38lo',
-          center: [0.1848, 5.6116], // University of Ghana, Legon (approx)
+          // A stock Mapbox style (the previous custom style id returned 404).
+          style: 'mapbox://styles/mapbox/outdoors-v12',
+          center: [-0.1848, 5.6116], // University of Ghana, Legon (lon, lat)
           zoom: 15.5,
           attributionControl: false,
         });

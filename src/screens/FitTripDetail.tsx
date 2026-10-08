@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Icon, ScreenHeader } from '../components/ui';
 import { fetchClubs, fetchFitTrips } from '../lib/api';
+import { addTodaySteps, stepsToKm } from '../lib/steps';
+import { useStepCounter } from '../hooks/useStepCounter';
 import type { Club, FitTrip } from '../lib/types';
 
 interface Props {
@@ -22,7 +24,21 @@ export default function FitTripDetail({ tripId }: Props) {
       .catch(() => setClubs([]));
   }, []);
 
+  const [tracking, setTracking] = useState(false);
+  const [savedTotal, setSavedTotal] = useState<number | null>(null);
+  const { steps, status } = useStepCounter(tracking);
+
   const trip = tripId ? trips.find(t => t.id === tripId) : trips[0];
+
+  function toggleTracker() {
+    if (tracking) {
+      setSavedTotal(addTodaySteps(steps));
+      setTracking(false);
+    } else {
+      setSavedTotal(null);
+      setTracking(true);
+    }
+  }
 
   if (trips.length === 0) {
     return (
@@ -147,15 +163,67 @@ export default function FitTripDetail({ tripId }: Props) {
           </div>
         </section>
 
-        {/* Start action */}
-        <button
-          type="button"
-          onClick={() => navigate('/scan')}
-          className="w-full h-14 bg-primary text-on-primary rounded-full font-title-md text-title-md shadow-md transition active:scale-[0.97] flex items-center justify-center gap-sm"
-        >
-          <Icon name="play_circle" size={22} fill style={{ fontVariationSettings: "'FILL' 1" }} />
-          Start this FitTrip
-        </button>
+        {/* Step tracker — counts real steps from the device motion sensor */}
+        <section className="rounded-card bg-surface-container-lowest soft-border p-md space-y-md">
+          <div className="flex items-center justify-between">
+            <h3 className="font-title-md text-title-md">Trip tracker</h3>
+            <span className="font-label-sm text-label-sm text-on-surface-variant">
+              {status === 'running'
+                ? 'Counting steps…'
+                : tracking
+                  ? 'Starting…'
+                  : savedTotal !== null
+                    ? 'Saved'
+                    : 'Idle'}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-3 gap-sm text-center">
+            <div>
+              <p className="font-headline-lg text-headline-lg font-bold text-primary">{steps.toLocaleString()}</p>
+              <p className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Steps</p>
+            </div>
+            <div>
+              <p className="font-headline-lg text-headline-lg font-bold text-secondary">{stepsToKm(steps).toFixed(2)}</p>
+              <p className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Km</p>
+            </div>
+            <div>
+              <p className="font-headline-lg text-headline-lg font-bold text-tertiary">{Math.round(steps * 0.04)}</p>
+              <p className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Kcal</p>
+            </div>
+          </div>
+
+          {(status === 'unsupported' || status === 'denied') && (
+            <p className="font-label-sm text-label-sm text-on-surface-variant">
+              {status === 'denied'
+                ? 'Motion access was denied — enable it in your browser settings to count steps.'
+                : 'This device has no motion sensor, so steps cannot be counted here.'}
+            </p>
+          )}
+
+          {savedTotal !== null && (
+            <p className="font-label-sm text-label-sm text-primary">
+              {steps.toLocaleString()} steps saved — {savedTotal.toLocaleString()} counted on this device today.
+            </p>
+          )}
+
+          <button
+            type="button"
+            onClick={toggleTracker}
+            disabled={status === 'unsupported' || status === 'denied'}
+            className={`w-full h-14 rounded-full font-title-md text-title-md shadow-md transition active:scale-[0.97] flex items-center justify-center gap-sm disabled:opacity-50 ${
+              tracking ? 'bg-error-container text-error' : 'bg-primary text-on-primary'
+            }`}
+          >
+            <Icon
+              name={tracking ? 'stop_circle' : 'play_circle'}
+              size={22}
+              fill
+              style={{ fontVariationSettings: "'FILL' 1" }}
+            />
+            {tracking ? 'Stop & save' : 'Start this FitTrip'}
+          </button>
+        </section>
 
         {/* Tips */}
         <div className="rounded-card bg-primary-container/10 border border-primary/5 p-md space-y-sm">

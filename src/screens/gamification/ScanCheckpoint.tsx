@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import jsQR from 'jsqr';
 import { Alert, DifficultyPill, Icon, ScreenHeader } from '../../components/ui';
 import { useAuth } from '../../context/AuthContext';
 import { fetchCheckpoints, scanCheckpoint, type ScanResult, usingDemoData } from '../../lib/api';
@@ -17,6 +18,9 @@ export default function ScanCheckpoint() {
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const decodeCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const lastScanRef = useRef<{ code: string; at: number } | null>(null);
+  const decodingRef = useRef(false);
 
   const [cameraOn, setCameraOn] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
@@ -54,6 +58,60 @@ export default function ScanCheckpoint() {
       setCameraError('Camera unavailable — enter the checkpoint code below instead.');
     }
   }
+
+  /** Pull a checkpoint code out of whatever the QR image contained. */
+  function codeFromQr(text: string): string | null {
+    const trimmed = text.trim();
+    if (!trimmed) return null;
+    // Prefer a known checkpoint code embedded in the payload (labels, URLs).
+    const match = checkpoints.find(cp => trimmed.toUpperCase().includes(cp.code.toUpperCase()));
+    if (match) return match.code;
+    if (/^[A-Za-z0-9-]{2,24}$/.test(trimmed)) return trimmed;
+    return null;
+  }
+
+  /** Read QR frames off the live camera and auto-submit the decoded code. */
+  useEffect(() => {
+    if (!cameraOn) return;
+    let raf = 0;
+    if (!decodeCanvasRef.current) decodeCanvasRef.current = document.createElement('canvas');
+    const canvas = decodeCanvasRef.current;
+
+    const tick = () => {
+      const video = videoRef.current;
+      if (video && video.readyState >= video.HAVE_ENOUGH_DATA && video.videoWidth > 0 && !decodingRef.current) {
+        const width = Math.min(480, video.videoWidth);
+        const height = Math.max(1, Math.round((video.videoHeight / video.videoWidth) * width));
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        if (ctx) {
+          decodingRef.current = true;
+          try {
+            ctx.drawImage(video, 0, 0, width, height);
+            const image = ctx.getImageData(0, 0, width, height);
+            const hit = jsQR(image.data, width, height, { inversionAttempts: 'attemptBoth' });
+            if (hit && hit.data) {
+              const code = codeFromQr(hit.data);
+              const now = Date.now();
+              const last = lastScanRef.current;
+              // Re-submit the same code only after 8s, matching the cooldown UX.
+              if (code && (!last || last.code !== code || now - last.at > 8000)) {
+                lastScanRef.current = { code, at: now };
+                void submit(code);
+              }
+            }
+          } finally {
+            decodingRef.current = false;
+          }
+        }
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cameraOn, checkpoints]);
 
   async function submit(raw: string) {
     const trimmed = raw.trim();
@@ -104,6 +162,9 @@ export default function ScanCheckpoint() {
                 <Icon name="qr_code_scanner" size={56} />
                 <p className="font-label-md text-label-md">
                   Point your camera at a CampusFit checkpoint
+                </p>
+                <p className="font-label-sm text-label-sm text-white/50">
+                  The QR code is read automatically, or type the code below
                 </p>
               </div>
             )}

@@ -9,8 +9,21 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { fetchActivityStats, fetchFitTrips } from '../lib/api';
+import { readTodaySteps } from '../lib/steps';
 import type { FitTrip } from '../lib/types';
 import type { ActivityStats } from '../lib/types';
+
+/** Short-cuts shown in the Quick links row on the dashboard. */
+const QUICK_LINKS: { to: string; label: string; icon: string; tint: string }[] = [
+  { to: '/scan', label: 'Scan', icon: 'qr_code_scanner', tint: 'bg-primary-container/15 text-primary' },
+  { to: '/map', label: 'Map', icon: 'map', tint: 'bg-secondary-container/15 text-secondary' },
+  { to: '/workout', label: 'Schedule', icon: 'calendar_month', tint: 'bg-tertiary-container/15 text-tertiary' },
+  { to: '/explore/search', label: 'Search', icon: 'search', tint: 'bg-primary-container/15 text-primary' },
+  { to: '/challenges', label: 'Challenges', icon: 'emoji_events', tint: 'bg-secondary-container/15 text-secondary' },
+  { to: '/leaderboard', label: 'Ranking', icon: 'leaderboard', tint: 'bg-tertiary-container/15 text-tertiary' },
+  { to: '/badges', label: 'Badges', icon: 'workspace_premium', tint: 'bg-primary-container/15 text-primary' },
+  { to: '/record', label: 'Post clip', icon: 'videocam', tint: 'bg-secondary-container/15 text-secondary' },
+];
 
 export default function Stitch01_Student_Dashboard() {
   const navigate = useNavigate();
@@ -18,6 +31,7 @@ export default function Stitch01_Student_Dashboard() {
   const [stats, setStats] = useState<ActivityStats | null>(null);
   const [ringOffset, setRingOffset] = useState(440); // start fully empty, then animate
   const [trips, setTrips] = useState<FitTrip[]>([]);
+  const [deviceSteps, setDeviceSteps] = useState(() => readTodaySteps());
   const tripFallback: FitTrip = {
     id: '',
     name: 'Campus trip',
@@ -41,12 +55,20 @@ export default function Stitch01_Student_Dashboard() {
   }, []);
 
   useEffect(() => {
-    const pct = stats ? Math.min(1, stats.steps / stats.step_goal) : 0;
+    const id = window.setInterval(() => setDeviceSteps(readTodaySteps()), 5000);
+    return () => window.clearInterval(id);
+  }, []);
+
+  useEffect(() => {
+    const current = deviceSteps > 0 ? deviceSteps : stats?.steps ?? 0;
+    const goal = stats?.step_goal ?? 10000;
+    const pct = Math.min(1, current / goal);
     const t = window.setTimeout(() => setRingOffset(440 * (1 - pct)), 300);
     return () => window.clearTimeout(t);
-  }, [stats]);
+  }, [stats, deviceSteps]);
 
-  const steps = stats?.steps ?? 7420;
+  // Prefer steps counted on this device today; fall back to the profile stats.
+  const steps = deviceSteps > 0 ? deviceSteps : stats?.steps ?? 0;
   const goalPct = Math.round((steps / (stats?.step_goal ?? 10000)) * 100);
   const firstName = profile?.full_name?.split(' ')[0] ?? 'Student';
   return (
@@ -66,6 +88,28 @@ export default function Stitch01_Student_Dashboard() {
 </button>
 </header>
 <main className="px-container-padding space-y-lg mt-md">
+
+<section aria-label="Quick links" className="space-y-sm">
+<div className="flex items-end justify-between">
+<h3 className="font-title-md text-title-md text-on-surface">Quick links</h3>
+<button onClick={() => navigate('/clubs')} className="text-tertiary font-label-md">Clubs</button>
+</div>
+<div className="grid grid-cols-4 gap-sm">
+{QUICK_LINKS.map(link => (
+<button
+    key={link.to}
+    type="button"
+    onClick={() => navigate(link.to)}
+    className="flex flex-col items-center gap-xs rounded-2xl bg-surface-container-lowest border border-black/5 p-md text-center transition hover:shadow-card-lg active:scale-95"
+>
+<span className={`grid h-10 w-10 place-items-center rounded-full ${link.tint}`}>
+<span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>{link.icon}</span>
+</span>
+<span className="font-label-sm text-label-sm text-on-surface leading-tight">{link.label}</span>
+</button>
+))}
+</div>
+</section>
 
 <section className="grid grid-cols-1 md:grid-cols-2 gap-card-gap">
 

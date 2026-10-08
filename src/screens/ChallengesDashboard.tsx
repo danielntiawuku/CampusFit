@@ -2,35 +2,56 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ScreenHeader, Icon, EmptyState } from '../components/ui';
 import { useAuth } from '../context/AuthContext';
-import { fetchClubs, fetchClubMembership, joinClub, leaveClub } from '../lib/api';
-import type { Club } from '../lib/types';
+import {
+  fetchChallenges,
+  fetchClubs,
+  fetchClubMembership,
+  joinClub,
+  leaveClub,
+} from '../lib/api';
+import type { Challenge, Club } from '../lib/types';
+
+const METRIC_LABEL: Record<Challenge['metric'], string> = {
+  scans: 'scans',
+  points: 'points',
+  distance_km: 'km',
+  checkpoints: 'checkpoints',
+};
+
+function daysLeft(endsAt: string): number {
+  const ms = new Date(endsAt).getTime() - Date.now();
+  return Math.max(0, Math.ceil(ms / 86400000));
+}
 
 export default function ChallengesDashboard() {
   const navigate = useNavigate();
   const { profile, loading: authLoading } = useAuth();
+  const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [clubs, setClubs] = useState<Club[]>([]);
   const [memberClubs, setMemberClubs] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [joining, setJoining] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!profile?.id) return;
     let cancelled = false;
     Promise.all([
+      fetchChallenges(),
       fetchClubs(),
-      fetchClubMembership(profile.id).catch(() => []),
+      profile?.id ? fetchClubMembership(profile.id).catch(() => []) : Promise.resolve([]),
     ])
-      .then(([clubData, membership]) => {
-        if (!cancelled) {
-          setClubs(clubData);
-          setMemberClubs(membership);
-          setLoading(false);
-        }
+      .then(([list, clubData, membership]) => {
+        if (cancelled) return;
+        setChallenges(list);
+        setClubs(clubData);
+        setMemberClubs(membership);
+        setLoading(false);
       })
       .catch(() => {
         if (!cancelled) setLoading(false);
       });
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [profile?.id]);
 
   async function toggleClub(clubId: string) {
@@ -45,7 +66,7 @@ export default function ChallengesDashboard() {
         setMemberClubs(prev => [...prev, clubId]);
       }
     } catch {
-      // revert on error
+      // leave the list as-is; the server refused the write
     } finally {
       setJoining(null);
     }
@@ -56,7 +77,7 @@ export default function ChallengesDashboard() {
       <div className="flex flex-col">
         <ScreenHeader title="Challenges" onBack={() => navigate(-1)} />
         <main className="space-y-md px-container-padding pb-8">
-          {[1, 2, 3, 4, 5].map(i => (
+          {[1, 2, 3].map(i => (
             <div key={i} className="skeleton h-24 rounded-card" />
           ))}
         </main>
@@ -70,109 +91,147 @@ export default function ChallengesDashboard() {
         title="Challenges"
         onBack={() => navigate(-1)}
         right={
-          <button
-            type="button"
-            onClick={() => navigate('/clubs')}
-            aria-label="All clubs"
-            className="grid h-10 w-10 place-items-center rounded-full bg-surface-container-lowest transition hover:opacity-80 active:scale-95"
-          >
-            <Icon name="groups" size={20} />
-          </button>
+          <div className="flex gap-xs">
+            <button
+              type="button"
+              onClick={() => navigate('/clubs')}
+              aria-label="Clubs"
+              className="grid h-10 w-10 place-items-center rounded-full bg-surface-container-lowest transition hover:opacity-80 active:scale-95"
+            >
+              <Icon name="groups" size={20} />
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate('/challenges/new')}
+              aria-label="New challenge"
+              className="grid h-10 w-10 place-items-center rounded-full bg-primary-container text-on-primary-container transition hover:opacity-85 active:scale-95"
+            >
+              <Icon name="add" size={22} />
+            </button>
+          </div>
         }
       />
 
       <main className="space-y-lg px-container-padding pb-8">
-        <p className="font-label-sm text-label-sm text-on-surface-variant">
-          Join a club to take part in its challenges. Challenge progress is tracked on the leaderboard.
-        </p>
+        <section className="space-y-sm">
+          <div className="flex items-end justify-between">
+            <div>
+              <h3 className="font-title-md text-title-md">Active challenges</h3>
+              <p className="font-label-sm text-label-sm text-on-surface-variant">
+                Hit the target before the deadline to earn the reward.
+              </p>
+            </div>
+          </div>
 
-        {clubs.length === 0 ? (
-          <EmptyState
-            icon="groups"
-            title="No challenges yet"
-            message="Club challenges will appear here once clubs add them."
-          />
-        ) : (
-          <div className="space-y-md">
-            {clubs.map(club => {
-              const isMember = memberClubs.includes(club.id);
-              return (
-                <div
-                  key={club.id}
-                  className="card p-lg"
-                >
-                  <div className="flex items-start gap-md">
-                    <div
-                      className="w-12 h-12 rounded-full shrink-0 flex items-center justify-center text-white font-bold"
-                      style={{ backgroundColor: club.color }}
-                    >
-                      {club.name.charAt(0)}
+          {challenges.length === 0 ? (
+            <EmptyState
+              icon="emoji_events"
+              title="No challenges yet"
+              message="Create the first challenge and compete with your club."
+            />
+          ) : (
+            <div className="space-y-sm">
+              {challenges.map(challenge => {
+                const days = daysLeft(challenge.ends_at);
+                return (
+                  <button
+                    key={challenge.id}
+                    type="button"
+                    onClick={() => navigate(`/challenges/${challenge.id}`)}
+                    className="card w-full p-md text-left transition hover:shadow-card-lg active:scale-[0.99]"
+                  >
+                    <div className="flex items-start gap-md">
+                      <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-primary-container/15 text-primary">
+                        <Icon name="emoji_events" size={22} />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate font-title-md text-title-md">{challenge.title}</p>
+                        <p className="truncate font-label-sm text-label-sm text-on-surface-variant">
+                          {challenge.club?.name ?? 'Open challenge'} ·{' '}
+                          {challenge.target_value} {METRIC_LABEL[challenge.metric]} ·{' '}
+                          {challenge.points_reward} pts
+                        </p>
+                      </div>
+                      <div className="shrink-0 text-right">
+                        <p className="font-title-md text-title-md text-primary">
+                          {days > 0 ? `${days}d` : 'now'}
+                        </p>
+                        <p className="font-label-sm text-label-sm text-on-surface-variant">left</p>
+                      </div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between gap-sm">
-                        <div>
-                          <h3 className="font-title-md text-title-md">{club.name}</h3>
-                          {club.description && (
-                            <p className="font-label-sm text-label-sm text-on-surface-variant mt-xs truncate">
-                              {club.description}
-                            </p>
-                          )}
-                        </div>
-                        {isMember ? (
-                          <button
-                            type="button"
-                            onClick={() => toggleClub(club.id)}
-                            disabled={joining === club.id}
-                            className="chip bg-error-container text-error"
-                          >
-                            {joining === club.id ? 'Joining…' : 'Leave club'}
-                          </button>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={() => toggleClub(club.id)}
-                            disabled={joining === club.id}
-                            className="chip"
-                          >
-                            {joining === club.id ? 'Joining…' : 'Join club'}
-                          </button>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-sm mt-sm pt-sm border-t border-outline-variant/30">
-                        <Icon name="people" size={16} className="text-on-surface-variant" />
-                        <span className="font-label-sm text-label-sm text-on-surface-variant">
-                          {club.member_count} members
+                    <p className="mt-sm font-label-sm text-label-sm text-on-surface-variant">
+                      {challenge.description || 'No description yet — open for details.'}
+                    </p>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </section>
+
+        <section className="space-y-sm">
+          <div className="flex items-end justify-between">
+            <div>
+              <h3 className="font-title-md text-title-md">Clubs</h3>
+              <p className="font-label-sm text-label-sm text-on-surface-variant">
+                Join a club to take part in its challenges. Membership is saved to your account.
+              </p>
+            </div>
+          </div>
+
+          {clubs.length === 0 ? (
+            <EmptyState
+              icon="groups"
+              title="No clubs"
+              message="Clubs created by an admin will appear here."
+            />
+          ) : (
+            <div className="space-y-sm">
+              {clubs.map(club => {
+                const isMember = memberClubs.includes(club.id);
+                return (
+                  <div key={club.id} className="card p-md">
+                    <div className="flex items-center justify-between gap-sm">
+                      <button
+                        type="button"
+                        onClick={() => navigate(`/clubs/${club.id}`)}
+                        className="flex min-w-0 flex-1 items-center gap-md text-left"
+                      >
+                        <span
+                          className="grid h-11 w-11 shrink-0 place-items-center rounded-xl font-bold text-white"
+                          style={{ backgroundColor: club.color }}
+                        >
+                          {club.name.charAt(0)}
                         </span>
-                        <span className="font-label-sm text-label-sm text-on-surface-variant">·</span>
-                        <span className="font-label-sm text-label-sm text-primary font-semibold">
-                          {isMember ? 'You are in' : 'Not a member'}
+                        <span className="min-w-0">
+                          <span className="block truncate font-title-md text-title-md">
+                            {club.name}
+                          </span>
+                          <span className="block font-label-sm text-label-sm text-on-surface-variant">
+                            {club.member_count} members ·{' '}
+                            {isMember ? 'You are in' : 'Not a member'}
+                          </span>
                         </span>
-                      </div>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => toggleClub(club.id)}
+                        disabled={joining === club.id}
+                        className={isMember ? 'chip bg-error-container text-error' : 'chip'}
+                      >
+                        {joining === club.id
+                          ? 'Saving…'
+                          : isMember
+                            ? 'Leave club'
+                            : 'Join club'}
+                      </button>
                     </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-
-        <div className="rounded-card border border-outline-variant/50 bg-surface-container-low p-md">
-          <p className="font-label-sm text-label-sm font-semibold text-on-surface">How challenges work</p>
-          <ul className="mt-sm space-y-xs">
-            <li className="flex gap-sm">
-              <span className="material-symbols-outlined text-[16px] text-primary shrink-0">check_circle</span>
-              <p className="font-label-sm text-label-sm text-on-surface-variant">Club leaders add challenges on the club dashboard.</p>
-            </li>
-            <li className="flex gap-sm">
-              <span className="material-symbols-outlined text-[16px] text-primary shrink-0">timer</span>
-              <p className="font-label-sm text-label-sm text-on-surface-variant">Each challenge runs for a set period with a progress goal.</p>
-            </li>
-            <li className="flex gap-sm">
-              <span className="material-symbols-outlined text-[16px] text-primary shrink-0">trending_up</span>
-              <p className="font-label-sm text-label-sm text-on-surface-variant">Your club's total progress appears on the leaderboard.</p>
-            </li>
-          </ul>
-        </div>
+                );
+              })}
+            </div>
+          )}
+        </section>
       </main>
     </div>
   );
