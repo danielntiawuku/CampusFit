@@ -51,7 +51,7 @@ export default function WorkoutSchedule() {
 
   return (
     <div className="flex flex-col">        <ScreenHeader
-        title="Workout Schedule"
+        title="Campus Workout Schedule"
         onBack={() => navigate(-1)}
         right={
           <button
@@ -67,7 +67,7 @@ export default function WorkoutSchedule() {
 
       <main className="space-y-lg px-container-padding pb-8">
         <p className="font-label-sm text-label-sm text-on-surface-variant">
-          Your weekly plan. Each trip is a workout you can start from the map.
+          Your weekly plan. Each workout is a campus route you can start from the map.
         </p>
 
         {loading ? (
@@ -140,7 +140,7 @@ export default function WorkoutSchedule() {
           <ul className="mt-sm space-y-xs">
             <li className="flex gap-sm">
               <span className="material-symbols-outlined text-[16px] text-primary shrink-0">map</span>
-              <p className="font-label-sm text-label-sm text-on-surface-variant">Tap any workout to open the campus map and start the route.</p>
+              <p className="font-label-sm text-label-sm text-on-surface-variant">Tap any workout to open the Legon campus map and start the route.</p>
             </li>
             <li className="flex gap-sm">
               <span className="material-symbols-outlined text-[16px] text-primary shrink-0">qr_code_scanner</span>
@@ -159,7 +159,7 @@ export default function WorkoutSchedule() {
           className="btn-primary w-full"
         >
           <Icon name="play_arrow" size={18} className="inline mr-sm" style={{ fontVariationSettings: "'FILL' 1" }} />
-          Start today's workout
+          Start today's campus workout
         </button>
       </main>
     </div>

@@ -155,7 +155,7 @@ export default function Stitch16_Club_Dashboard() {
               onClick={() => navigate('/record')}
               className="flex-1 px-md py-xs rounded-full border border-primary/30 bg-primary-container/10 text-primary font-label-md text-label-md hover:bg-primary-container/20 transition-colors"
             >
-              Scan checkpoint
+              Scan a spot
             </button>
           </div>
         </header>

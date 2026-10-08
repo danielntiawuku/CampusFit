@@ -15,7 +15,7 @@ interface NavEntry {
 
 const ENTRIES: NavEntry[] = [
   { to: '/home', icon: 'dashboard', label: 'Home' },
-  { to: '/explore', icon: 'directions_run', label: 'Explore' },
+  { to: '/explore', icon: 'directions_run', label: 'Spots' },
   { to: '/scan', icon: 'qr_code_scanner', label: 'Scan' },
   { to: '/clips', icon: 'play_circle', label: 'FitClips' },
   { to: '/profile', icon: 'person', label: 'Profile' },
