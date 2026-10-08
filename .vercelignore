@@ -1,0 +1,26 @@
+# ==========================================================================
+# Files kept OUT of the production build / deployment context.
+#
+# The Vite app only needs: index.html, src/, public/, package.json,
+# tsconfig.json, vite.config.ts, tailwind.config.js, postcss.config.js.
+# Everything below is documentation, design source, or generated evidence and
+# is not required to compile or run the deployed bundle.
+# ==========================================================================
+
+# Thesis documents and writing sources
+thesis/
+thesis_split/
+*.docx
+
+# Presentation decks and slide templates (incl. Office lock files)
+*.pptx
+~$*
+
+# Verification artefacts (screenshots, reports)
+verify/
+
+# Developer-only scripts (presentation / thesis / icon / verification builders)
+scripts/
+
+# Markdown documentation (kept in git, not needed to build the app)
+README.md

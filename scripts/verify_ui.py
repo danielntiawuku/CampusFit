@@ -71,6 +71,20 @@ ROUTES: list[tuple[str, str | None]] = [
     ("/privacy", None),
     ("/record", None),
     ("/forgot-password", None),
+    # Production additions (previous session + detail wiring)
+    ("/challenges", None),
+    ("/workout", None),
+    ("/map", None),
+    ("/admin/reports", None),
+    ("/admin/checkpoints", None),
+    ("/admin/clubs", None),
+    ("/admin/students", None),
+    ("/notifications/welcome", None),
+    ("/clubs/any", None),
+    ("/trip/any", None),
+    ("/clip/any", None),
+    ("/checkpoint/any", None),
+    ("/workout/any", None),
     ("/logo", "05_CampusFit_Logo_Mark.html"),
 ]
 
@@ -233,7 +247,9 @@ async def main() -> int:
                     method = ev.get("method")
                     params = ev.get("params", {})
                     if method == "Runtime.exceptionThrown":
-                        errors.append(params.get("exceptionDetails", {}).get("text", "exception"))
+                        det = params.get("exceptionDetails", {})
+                        desc = (det.get("exception", {}) or {}).get("description")
+                        errors.append(desc or det.get("text", "exception"))
                     elif method == "Runtime.consoleAPICalled" and params.get("type") == "error":
                         args = ", ".join(str(a.get("value", a.get("description", ""))) for a in params.get("args", []))
                         errors.append(f"console.error: {args}")

@@ -71,7 +71,7 @@ export default function Stitch08_Log_In() {
 </button>
 </div>
 <div className="flex justify-end">
-<a className="font-label-sm text-label-sm text-primary-container font-semibold hover:opacity-80 transition-opacity" href="#">Forgot password?</a>
+<Link to="/forgot-password" className="font-label-sm text-label-sm text-primary-container font-semibold hover:opacity-80 transition-opacity">Forgot password?</Link>
 </div>        </div>
 
 <div className="mt-xl">

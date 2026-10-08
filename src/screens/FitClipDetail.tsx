@@ -1,6 +1,8 @@
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Icon, ScreenHeader } from '../components/ui';
-import { DEMO_CLIPS } from '../lib/data';
+import { fetchFitClips } from '../lib/api';
+import type { FitClip } from '../lib/types';
 
 interface Props {
   clipId: string;
@@ -8,7 +10,36 @@ interface Props {
 
 export default function FitClipDetail({ clipId }: Props) {
   const navigate = useNavigate();
-  const clip = DEMO_CLIPS.find(c => c.id === clipId) ?? DEMO_CLIPS[0];
+  const [clips, setClips] = useState<FitClip[]>([]);
+
+  useEffect(() => {
+    fetchFitClips()
+      .then(setClips)
+      .catch(() => setClips([]));
+  }, []);
+
+  const clip = clips.find(c => c.id === clipId);
+
+  if (clips.length === 0) {
+    return (
+      <div className="flex flex-col min-h-[100dvh]">
+        <ScreenHeader title="Clip" onBack={() => navigate(-1)} />
+        <div className="flex flex-1 items-center justify-center py-xl">
+          <span className="material-symbols-outlined animate-spin text-[32px] text-primary-container">progress_activity</span>
+        </div>
+      </div>
+    );
+  }
+  if (!clip) {
+    return (
+      <div className="flex flex-col min-h-[100dvh]">
+        <ScreenHeader title="Clip" onBack={() => navigate(-1)} />
+        <p className="px-container-padding py-xl text-center text-on-surface-variant">
+          This clip could not be found.
+        </p>
+      </div>
+    );
+  }
   const authorName = clip.author?.full_name ?? 'Unknown';
 
   return (
@@ -32,11 +63,21 @@ export default function FitClipDetail({ clipId }: Props) {
         <div className="relative aspect-[9/16] bg-surface-container-highest/5 overflow-hidden">
           {/* Poster image */}
           <div className="absolute inset-0">
+            {clip.video_url ? (
+              <video
+                className="w-full h-full object-cover"
+                src={clip.video_url}
+                poster={clip.thumbnail_url ?? undefined}
+                controls
+                playsInline
+              />
+            ) : (
             <img
               className="w-full h-full object-cover"
               alt={clip.caption}
-              src={`https://lh3.googleusercontent.com/aida-public/AB6AXuA${clip.id === 'f1' ? 'D1pVMiHv7fbfL-a4FHjYvJZtGduVg063tea3saDDSm0SOg3wPp7ZwxYjXxbsyyoAD5QWNT2xtjlpxBWrr0jQMXfTdHlcjejvwQXmytt-p4vqbcAvsEkZrHy1ND12QOsoUPJjIVr4O_feTu79_A-Z4m3wI8AoQ3Sk2I_hAwZ1oI0Xe5KDMoM6v67cnd5PaZBQ9VINxkNH5a-yuWSy0XES3MBpxnSkKroIfVeDPNmwSpuwEDOcsQ0APnySaWqJJLmVQ16ZQw3u6Lqz3' : clip.id === 'f2' ? 'AXg1ZT0vUkVC9YLGOsQE-j53G0riuATblaQ7xw19Hc3Zs9ucPhTfBHJx1DMg5CGycRoZDFkp4lctdvVWPkvOq5ttfPl5eHAr4Grg3XI-Tm8Hbt49LtNHsnot9dFx8vHg5Y-ICztgOa9pdglNlXf9Bvg1z2d0f4aZ1_fPpKINMypmXoO8AK_N0PRlOCpxoDvRj0KCBr5cEn76FU5jrXiLjwisVXu8fFOAvqZ3RBkip8sDiXIoneuvUNweTeQmeCfyPaKNAGqQN6jYse' : clip.id === 'f3' ? 'AJJ9oa8qGSHkkeZ7Wev7vystdGMXBS-ciWP5Vs437BsXHLDIeOR_PUn7KP5OGyJGyMBsak6V5wKMYGe0uq6NGQhGzofgQ_ehfmFL_9T6yT7Muc9IPfjBZUFdSuXhn780I7rJqxUtB-eHQ348QxCel3hKAR2r8wT8GD1cjZlzEBgha2j3HZbeBvDVzJ77U4JdfVLlGoSS5EXdQzoTzW9h9K0qQr6NyVcKh37JUQcvbCOZ9E4JBBqkQqEoy6SMICogGdl-HuLUMcgX1N' : 'AegEeYZto49uJ7YjtINoQYadSVDt-8Cwje0gyGF94GmJkSKaC3zuMU9bTUUp1AemCt9jawaJ_9vI8_iOYj9g5lWMRq9-3GUARpabSrRFL8sgJoLH-rQ-Wp87pbaCDIL44Kpyq-hsa3lHICApWzyNxcJOode-JwxexgYaPxTg9h3alg11DV4fH-M9Atd_TxPcspYZyUMLd-qVC-Uy5Dr_MIFsDOh7tBfB90zp9jf4-CaXmNp7Qaj2LG-WmdopszFxyBFlAKXrDSjy1'}.JPG`}
+              src={clip.thumbnail_url ?? `https://lh3.googleusercontent.com/aida-public/AB6AXuA${clip.id === 'f1' ? 'D1pVMiHv7fbfL-a4FHjYvJZtGduVg063tea3saDDSm0SOg3wPp7ZwxYjXxbsyyoAD5QWNT2xtjlpxBWrr0jQMXfTdHlcjejvwQXmytt-p4vqbcAvsEkZrHy1ND12QOsoUPJjIVr4O_feTu79_A-Z4m3wI8AoQ3Sk2I_hAwZ1oI0Xe5KDMoM6v67cnd5PaZBQ9VINxkNH5a-yuWSy0XES3MBpxnSkKroIfVeDPNmwSpuwEDOcsQ0APnySaWqJJLmVQ16ZQw3u6Lqz3' : clip.id === 'f2' ? 'AXg1ZT0vUkVC9YLGOsQE-j53G0riuATblaQ7xw19Hc3Zs9ucPhTfBHJx1DMg5CGycRoZDFkp4lctdvVWPkvOq5ttfPl5eHAr4Grg3XI-Tm8Hbt49LtNHsnot9dFx8vHg5Y-ICztgOa9pdglNlXf9Bvg1z2d0f4aZ1_fPpKINMypmXoO8AK_N0PRlOCpxoDvRj0KCBr5cEn76FU5jrXiLjwisVXu8fFOAvqZ3RBkip8sDiXIoneuvUNweTeQmeCfyPaKNAGqQN6jYse' : clip.id === 'f3' ? 'AJJ9oa8qGSHkkeZ7Wev7vystdGMXBS-ciWP5Vs437BsXHLDIeOR_PUn7KP5OGyJGyMBsak6V5wKMYGe0uq6NGQhGzofgQ_ehfmFL_9T6yT7Muc9IPfjBZUFdSuXhn780I7rJqxUtB-eHQ348QxCel3hKAR2r8wT8GD1cjZlzEBgha2j3HZbeBvDVzJ77U4JdfVLlGoSS5EXdQzoTzW9h9K0qQr6NyVcKh37JUQcvbCOZ9E4JBBqkQqEoy6SMICogGdl-HuLUMcgX1N' : 'AegEeYZto49uJ7YjtINoQYadSVDt-8Cwje0gyGF94GmJkSKaC3zuMU9bTUUp1AemCt9jawaJ_9vI8_iOYj9g5lWMRq9-3GUARpabSrRFL8sgJoLH-rQ-Wp87pbaCDIL44Kpyq-hsa3lHICApWzyNxcJOode-JwxexgYaPxTg9h3alg11DV4fH-M9Atd_TxPcspYZyUMLd-qVC-Uy5Dr_MIFsDOh7tBfB90zp9jf4-CaXmNp7Qaj2LG-WmdopszFxyBFlAKXrDSjy1'}.JPG`}
             />
+            )}
           </div>
 
           {/* Gradient overlay */}

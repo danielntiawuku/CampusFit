@@ -1,11 +1,51 @@
 /* eslint-disable */
 /**
  * Screen 11 — Onboarding Interests
- * Ported verbatim from the Google Stitch export
- * (_campusfit_screens/11_Onboarding_Interests.html); interactivity is wired to the app
- * (routing, auth, gamification data) in App/routes.
+ * Ported from the Google Stitch export
+ * (_campusfit_screens/11_Onboarding_Interests.html); interactivity is wired to
+ * the app: interests are selectable, persisted to the profile, and the screen
+ * exits to the dashboard.
  */
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { updateProfile } from '../lib/api';
+
+const INTERESTS = [
+  { id: 'stay_fit', label: 'Stay fit', icon: 'fitness_center', tone: 'primary' },
+  { id: 'meet_people', label: 'Meet new people', icon: 'groups', tone: 'secondary' },
+  { id: 'compete', label: 'Compete on leaderboards', icon: 'emoji_events', tone: 'tertiary' },
+  { id: 'join_club', label: 'Join a club', icon: 'hub', tone: 'primary' },
+  { id: 'explore', label: 'Explore campus', icon: 'map', tone: 'secondary' },
+  { id: 'track', label: 'Track my progress', icon: 'analytics', tone: 'tertiary' },
+] as const;
+
+const TONE: Record<string, string> = {
+  primary: 'bg-primary-container/20 text-primary',
+  secondary: 'bg-secondary-container/20 text-secondary',
+  tertiary: 'bg-tertiary-container/20 text-tertiary',
+};
+
 export default function Stitch11_Onboarding_Interests() {
+  const navigate = useNavigate();
+  const { profile } = useAuth();
+  const [selected, setSelected] = useState<string[]>([]);
+
+  function toggle(id: string) {
+    setSelected(prev => (prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]));
+  }
+
+  async function finish() {
+    if (profile) {
+      try {
+        await updateProfile(profile.id, { interests: selected });
+      } catch {
+        /* non-fatal — onboarding still completes */
+      }
+    }
+    navigate('/home', { replace: true });
+  }
+
   return (
     <>
 
@@ -18,7 +58,7 @@ export default function Stitch11_Onboarding_Interests() {
 <div className="w-1.5 h-1.5 rounded-full bg-outline-variant"></div>
 </div>
 
-<button className="font-label-md text-label-md text-on-surface-variant hover:opacity-70 transition-opacity">
+<button onClick={() => navigate('/home', { replace: true })} className="font-label-md text-label-md text-on-surface-variant hover:opacity-70 transition-opacity">
             Skip
         </button>
 </header>
@@ -34,53 +74,28 @@ export default function Stitch11_Onboarding_Interests() {
 </section>
 
 <section className="grid grid-cols-2 gap-card-gap pb-xl">
-
-<div className="selection-card cursor-pointer bg-surface-container-lowest border border-black/[0.05] rounded-xl p-md flex flex-col gap-sm shadow-sm">
-<div className="w-10 h-10 rounded-full bg-primary-container/20 flex items-center justify-center text-primary">
-<span className="material-symbols-outlined">fitness_center</span>
+{INTERESTS.map(it => {
+    const on = selected.includes(it.id);
+    return (
+<button
+    key={it.id}
+    type="button"
+    onClick={() => toggle(it.id)}
+    aria-pressed={on}
+    className={`selection-card cursor-pointer flex flex-col gap-sm rounded-xl p-md text-left shadow-sm transition-all border ${on ? 'border-primary-container bg-primary-container/5 ring-2 ring-primary-container/30' : 'border-black/[0.05] bg-surface-container-lowest'}`}
+>
+<div className={`w-10 h-10 rounded-full flex items-center justify-center ${TONE[it.tone]}`}>
+<span className="material-symbols-outlined">{it.icon}</span>
 </div>
-<span className="font-title-md text-label-md text-on-surface leading-tight">Stay fit</span>
-</div>
-
-<div className="selection-card cursor-pointer bg-surface-container-lowest border border-black/[0.05] rounded-xl p-md flex flex-col gap-sm shadow-sm">
-<div className="w-10 h-10 rounded-full bg-secondary-container/20 flex items-center justify-center text-secondary">
-<span className="material-symbols-outlined">groups</span>
-</div>
-<span className="font-title-md text-label-md text-on-surface leading-tight">Meet new people</span>
-</div>
-
-<div className="selection-card cursor-pointer bg-surface-container-lowest border border-black/[0.05] rounded-xl p-md flex flex-col gap-sm shadow-sm">
-<div className="w-10 h-10 rounded-full bg-tertiary-container/20 flex items-center justify-center text-tertiary">
-<span className="material-symbols-outlined">emoji_events</span>
-</div>
-<span className="font-title-md text-label-md text-on-surface leading-tight">Compete on leaderboards</span>
-</div>
-
-<div className="selection-card cursor-pointer bg-surface-container-lowest border border-black/[0.05] rounded-xl p-md flex flex-col gap-sm shadow-sm">
-<div className="w-10 h-10 rounded-full bg-primary-container/20 flex items-center justify-center text-primary">
-<span className="material-symbols-outlined">hub</span>
-</div>
-<span className="font-title-md text-label-md text-on-surface leading-tight">Join a club</span>
-</div>
-
-<div className="selection-card cursor-pointer bg-surface-container-lowest border border-black/[0.05] rounded-xl p-md flex flex-col gap-sm shadow-sm">
-<div className="w-10 h-10 rounded-full bg-secondary-container/20 flex items-center justify-center text-secondary">
-<span className="material-symbols-outlined">map</span>
-</div>
-<span className="font-title-md text-label-md text-on-surface leading-tight">Explore campus</span>
-</div>
-
-<div className="selection-card cursor-pointer bg-surface-container-lowest border border-black/[0.05] rounded-xl p-md flex flex-col gap-sm shadow-sm">
-<div className="w-10 h-10 rounded-full bg-tertiary-container/20 flex items-center justify-center text-tertiary">
-<span className="material-symbols-outlined">analytics</span>
-</div>
-<span className="font-title-md text-label-md text-on-surface leading-tight">Track my progress</span>
-</div>
+<span className="font-title-md text-label-md text-on-surface leading-tight">{it.label}</span>
+</button>
+    );
+})}
 </section>
 </main>
 
 <footer className="w-full max-w-md px-container-padding pb-xl mt-auto">
-<button className="w-full h-14 bg-outline-variant text-on-surface-variant font-label-md text-body-md rounded-full shadow-lg shadow-primary/5 transition-all duration-300 flex items-center justify-center" disabled={true} id="continue-btn">
+<button onClick={finish} disabled={selected.length === 0} className={`w-full h-14 font-label-md text-body-md rounded-full shadow-lg shadow-primary/5 transition-all duration-300 flex items-center justify-center ${selected.length > 0 ? 'bg-primary-container text-on-primary-container' : 'bg-outline-variant text-on-surface-variant cursor-not-allowed'}`} id="continue-btn">
             Continue
         </button>
 </footer>

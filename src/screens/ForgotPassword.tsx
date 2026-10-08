@@ -75,8 +75,8 @@ export default function ForgotPassword() {
               <Link to="/login" className="btn-primary flex-1">
                 Back to log in
               </Link>
-              <button type="button" onClick={() => setSent(false)} className="btn-ghost flex-1">
-                Resend
+              <button type="button" onClick={() => navigate('/signup')} className="btn-ghost flex-1">
+                Create account
               </button>
             </div>
           </div>

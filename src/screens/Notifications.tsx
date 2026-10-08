@@ -1,6 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { EmptyState, ScreenHeader } from '../components/ui';
+import { useAuth } from '../context/AuthContext';
+import { fetchNotices, markAllNoticesRead, markNoticeRead } from '../lib/notifications';
+import type { AppNotice } from '../lib/notifications';
 
 /**
  * Production screen not present in the Stitch export — built from the same
@@ -67,17 +70,26 @@ const NOTICES: Notice[] = [
 
 export default function Notifications() {
   const navigate = useNavigate();
-  const [notices, setNotices] = useState(NOTICES);
+  const [notices, setNotices] = useState<AppNotice[]>([]);
+  const { profile } = useAuth();
+
+  useEffect(() => {
+    void fetchNotices(profile?.id ?? null)
+      .then((ns) => setNotices(ns.length ? ns : NOTICES))
+      .catch(() => setNotices(NOTICES));
+  }, [profile?.id]);
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
 
   const visible = notices.filter(n => filter === 'all' || n.unread);
   const unreadCount = notices.filter(n => n.unread).length;
 
   function markRead(id: string) {
+    markNoticeRead(id);
     setNotices(prev => prev.map(n => (n.id === id ? { ...n, unread: false } : n)));
   }
 
   function markAllRead() {
+    markAllNoticesRead(notices.map(n => n.id));
     setNotices(prev => prev.map(n => ({ ...n, unread: false })));
   }
 

@@ -1,6 +1,8 @@
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Icon, ScreenHeader } from '../components/ui';
-import { DEMO_TRIPS } from '../lib/data';
+import { fetchFitTrips } from '../lib/api';
+import type { FitTrip } from '../lib/types';
 
 interface Props {
   tripId?: string;
@@ -8,7 +10,36 @@ interface Props {
 
 export default function WorkoutDetail({ tripId }: Props) {
   const navigate = useNavigate();
-  const trip = tripId ? DEMO_TRIPS.find(t => t.id === tripId) : null;
+  const [trips, setTrips] = useState<FitTrip[]>([]);
+
+  useEffect(() => {
+    fetchFitTrips()
+      .then(setTrips)
+      .catch(() => setTrips([]));
+  }, []);
+
+  const trip = tripId ? trips.find(t => t.id === tripId) : trips[0] ?? null;
+
+  if (tripId && trips.length === 0) {
+    return (
+      <div className="flex flex-col">
+        <ScreenHeader title="Workout Details" onBack={() => navigate(-1)} />
+        <div className="flex flex-1 items-center justify-center py-xl">
+          <span className="material-symbols-outlined animate-spin text-[32px] text-primary-container">progress_activity</span>
+        </div>
+      </div>
+    );
+  }
+  if (tripId && !trip) {
+    return (
+      <div className="flex flex-col">
+        <ScreenHeader title="Workout Details" onBack={() => navigate(-1)} />
+        <p className="px-container-padding py-xl text-center text-on-surface-variant">
+          This workout could not be found.
+        </p>
+      </div>
+    );
+  }
 
   const workouts = [
     { title: trip?.name ?? 'Campus Run', subtitle: trip?.description ?? 'Morning trail run', distance: trip?.distance_km ?? 4.2, duration: '24:15', pace: '5:45 /km', calories: 387, color: 'primary' },

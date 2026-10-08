@@ -114,7 +114,7 @@ export default function Stitch07_Create_Account() {
 <input checked={terms} onChange={e => setTerms(e.target.checked)} className="w-5 h-5 rounded-md border-outline-variant text-primary focus:ring-primary-container cursor-pointer" id="terms" type="checkbox"/>
 </div>
 <label className="font-body-md text-on-surface-variant leading-tight" htmlFor="terms">
-                    I agree to the <a className="text-primary font-medium underline underline-offset-2" href="#">Terms</a> &amp; <a className="text-primary font-medium underline underline-offset-2" href="#">Privacy Policy</a>.
+                    I agree to the <Link to="/privacy" className="text-primary font-medium underline underline-offset-2">Terms</Link> &amp; <Link to="/privacy" className="text-primary font-medium underline underline-offset-2">Privacy Policy</Link>.
                 </label>
 </div>
 

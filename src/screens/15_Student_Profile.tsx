@@ -8,12 +8,14 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { fetchLeaderboard } from '../lib/api';
+import { fetchClubMembership, fetchClubs, fetchLeaderboard } from '../lib/api';
+import type { Club } from '../lib/types';
 
 export default function Stitch15_Student_Profile() {
   const navigate = useNavigate();
   const { profile } = useAuth();
   const [rank, setRank] = useState<number | null>(null);
+  const [club, setClub] = useState<Club | null>(null);
 
   useEffect(() => {
     fetchLeaderboard()
@@ -22,6 +24,13 @@ export default function Stitch15_Student_Profile() {
         setRank(mine?.rank ?? null);
       })
       .catch(() => setRank(null));
+  }, [profile]);
+
+  useEffect(() => {
+    if (!profile) return;
+    Promise.all([fetchClubs(), fetchClubMembership(profile.id)])
+      .then(([clubs, mine]) => setClub(clubs.find(c => mine.includes(c.id)) ?? null))
+      .catch(() => setClub(null));
   }, [profile]);
 
   const name = profile?.full_name ?? 'Jordan Smith';
@@ -37,7 +46,7 @@ export default function Stitch15_Student_Profile() {
 
 <header className="w-full top-0 sticky z-40 bg-background/80 backdrop-blur-md flex items-center justify-between px-container-padding py-xs">
 <div className="flex items-center gap-md">
-<span onClick={() => navigate('/home')} className="material-symbols-outlined text-on-surface-variant hover:opacity-80 transition-opacity active:scale-95 transition-transform cursor-pointer">menu</span>
+<button type="button" onClick={() => navigate('/home')} className="material-symbols-outlined text-on-surface-variant hover:opacity-80 transition-opacity active:scale-95 transition-transform p-xs" aria-label="Go to home">menu</button>
 </div>
 <h1 className="font-headline-lg-mobile text-headline-lg-mobile font-bold text-primary">Profile</h1>
 <div className="flex items-center gap-md">
@@ -56,7 +65,7 @@ export default function Stitch15_Student_Profile() {
 </div>
 </div>
 <h2 className="font-title-md text-title-md text-on-background">{name}</h2>
-<p className="text-on-surface-variant font-label-md text-label-md mb-sm">Varsity Run Club · Year 3</p>
+<p className="text-on-surface-variant font-label-md text-label-md mb-sm">{club?.name ?? 'No club yet'} · Year 3</p>
 
 <div className="flex gap-xs justify-center">
 <span className="flex items-center gap-xs px-sm py-xs bg-secondary-container/20 rounded-full border border-secondary-container/30">
@@ -72,11 +81,11 @@ export default function Stitch15_Student_Profile() {
 
 <section className="grid grid-cols-3 gap-sm">
 <div className="bg-surface-container-lowest border border-black/5 rounded-2xl p-sm flex flex-col items-center text-center">
-<span className="font-title-md text-title-md text-primary">24</span>
-<span className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">routes done</span>
+<span className="font-title-md text-title-md text-primary">{(profile?.points ?? 0).toLocaleString()}</span>
+<span className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">points</span>
 </div>
 <div className="bg-surface-container-lowest border border-black/5 rounded-2xl p-sm flex flex-col items-center text-center">
-<span className="font-title-md text-title-md text-secondary">112</span>
+<span className="font-title-md text-title-md text-secondary">{(profile?.distance_km ?? 0).toFixed(0)}</span>
 <span className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">km total</span>
 </div>
 <div className="bg-surface-container-lowest border border-black/5 rounded-2xl p-sm flex flex-col items-center text-center">
@@ -88,7 +97,7 @@ export default function Stitch15_Student_Profile() {
 <section className="bg-surface-container-lowest border border-black/5 rounded-3xl p-lg space-y-md">
 <div className="flex justify-between items-start">
 <div>
-<h3 className="font-title-md text-title-md text-on-background">Varsity Run Club</h3>
+<h3 className="font-title-md text-title-md text-on-background">{club?.name ?? 'Join a club'}</h3>
 <span className="inline-block mt-xs px-xs py-1 bg-primary/10 text-primary rounded font-label-sm text-label-sm">Primary Club</span>
 </div>
 <div className="flex -space-x-2">
@@ -103,11 +112,11 @@ export default function Stitch15_Student_Profile() {
 <div className="flex items-center gap-xl py-sm border-y border-outline-variant/30">
 <div className="flex flex-col">
 <span className="font-label-sm text-label-sm text-on-surface-variant">Active Members</span>
-<span className="font-body-lg text-body-lg font-bold">156</span>
+<span className="font-body-lg text-body-lg font-bold">{club?.member_count ?? 0}</span>
 </div>
 <div className="flex flex-col">
 <span className="font-label-sm text-label-sm text-on-surface-variant">Leaderboard</span>
-<span className="font-body-lg text-body-lg font-bold text-secondary">3rd Place</span>
+<span className="font-body-lg text-body-lg font-bold text-secondary">{rank ? `#${rank}` : '—'}</span>
 </div>
 </div>
 <button onClick={() => navigate('/clubs')} className="flex items-center gap-xs font-label-md text-label-md text-primary font-bold hover:opacity-80 transition-all">

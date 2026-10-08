@@ -141,7 +141,7 @@ export async function fetchFitClips(): Promise<FitClip[]> {
   if (!sb) return DEMO_CLIPS;
   const { data, error } = await sb
     .from('fitclips')
-    .select('*, author:profiles(full_name, avatar_url)')
+    .select('*, author:profiles!fitclips_user_id_fkey(full_name, avatar_url)')
     .order('created_at', { ascending: false })
     .limit(50);
   if (error) throw error;
@@ -189,8 +189,18 @@ export async function fetchActivityStats(): Promise<typeof DEMO_STATS> {
     };
 }
 
-/* --------------------------------------------------------------- reports */
+/** Total validated checkpoint scans (admin analytics). */
+export async function fetchScanCount(): Promise<number> {
+  const sb = supabaseOrNull();
+  if (!sb) return 0;
+  const { count, error } = await sb
+    .from('checkpoint_scans')
+    .select('id', { count: 'exact', head: true });
+  if (error) throw error;
+  return count ?? 0;
+}
 
+/* --------------------------------------------------------------- reports */
 export async function submitProblemReport(
   userId: string,
   payload: { category: string; subject: string; details: string }
@@ -214,8 +224,210 @@ export async function submitProblemReport(
   return data as ProblemReport;
 }
 
-/* ------------------------------------------------------------- sessions */
+/** Fetch all problem reports (admin only — RLS allows admin to read all). */
+export async function fetchProblemReports(): Promise<ProblemReport[]> {
+  const sb = supabaseOrNull();
+  if (!sb) return [];
+  const { data, error } = await sb
+    .from('problem_reports')
+    .select('*, profiles:profiles(full_name, email)')
+    .order('created_at', { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as ProblemReport[];
+}
 
+/** Update a problem report status (admin only). */
+export async function updateProblemReportStatus(
+  reportId: string,
+  status: 'open' | 'in_progress' | 'resolved'
+): Promise<void> {
+  const sb = supabaseOrNull();
+  if (!sb) return;
+  const { error } = await sb
+    .from('problem_reports')
+    .update({ status })
+    .eq('id', reportId);
+  if (error) throw error;
+}
+
+/* --------------------------------------------------------- checkpoint CRUD (admin) */
+export async function createCheckpoint(
+  checkpoint: Omit<Checkpoint, 'id' | 'created_at'>
+): Promise<Checkpoint | null> {
+  const sb = supabaseOrNull();
+  if (!sb) return null;
+  const { data, error } = await sb
+    .from('checkpoints')
+    .insert(checkpoint)
+    .select()
+    .single();
+  if (error) throw error;
+  return data as Checkpoint;
+}
+
+export async function updateCheckpoint(
+  id: string,
+  patch: Partial<Omit<Checkpoint, 'id' | 'created_at'>>
+): Promise<void> {
+  const sb = supabaseOrNull();
+  if (!sb) return;
+  const { error } = await sb.from('checkpoints').update(patch).eq('id', id);
+  if (error) throw error;
+}
+
+export async function deleteCheckpoint(id: string): Promise<void> {
+  const sb = supabaseOrNull();
+  if (!sb) return;
+  const { error } = await sb.from('checkpoints').delete().eq('id', id);
+  if (error) throw error;
+}
+
+/* --------------------------------------------------------- club CRUD (admin) */
+export async function createClub(
+  club: Omit<Club, 'id' | 'member_count'>
+): Promise<Club | null> {
+  const sb = supabaseOrNull();
+  if (!sb) return null;
+  const { data, error } = await sb
+    .from('clubs')
+    .insert(club)
+    .select()
+    .single();
+  if (error) throw error;
+  return data as Club;
+}
+
+export async function updateClub(
+  id: string,
+  patch: Partial<Omit<Club, 'id' | 'member_count'>>
+): Promise<void> {
+  const sb = supabaseOrNull();
+  if (!sb) return;
+  const { error } = await sb.from('clubs').update(patch).eq('id', id);
+  if (error) throw error;
+}
+
+export async function deleteClub(id: string): Promise<void> {
+  const sb = supabaseOrNull();
+  if (!sb) return;
+  const { error } = await sb.from('clubs').delete().eq('id', id);
+  if (error) throw error;
+}
+
+/* --------------------------------------------------------- student management (admin) */
+export async function fetchAllProfiles(): Promise<Profile[]> {
+  const sb = supabaseOrNull();
+  if (!sb) return [];
+  const { data, error } = await sb
+    .from('profiles')
+    .select('*')
+    .order('created_at', { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as Profile[];
+}
+
+export async function updateProfileRole(
+  userId: string,
+  role: 'student' | 'admin'
+): Promise<void> {
+  const sb = supabaseOrNull();
+  if (!sb) return;
+  const { error } = await sb
+    .from('profiles')
+    .update({ role })
+    .eq('id', userId);
+  if (error) throw error;
+}
+
+export async function updateProfileVerification(
+  userId: string,
+  status: 'unverified' | 'pending' | 'verified' | 'rejected'
+): Promise<void> {
+  const sb = supabaseOrNull();
+  if (!sb) return;
+  const { error } = await sb
+    .from('profiles')
+    .update({ verification_status: status })
+    .eq('id', userId);
+  if (error) throw error;
+}
+
+/* --------------------------------------------------------- storage helpers */
+export async function uploadAvatar(
+  file: File,
+  userId: string
+): Promise<string | null> {
+  const sb = supabaseOrNull();
+  if (!sb) return null;
+  const fileExt = file.name.split('.').pop() ?? 'jpg';
+  const path = `${userId}/${Date.now()}.${fileExt}`;
+  const { error: uploadError } = await sb
+    .storage
+    .from('avatars')
+    .upload(path, file, { upsert: true, cacheControl: '3600' });
+  if (uploadError) throw uploadError;
+  const { data: urlData } = await sb
+    .storage
+    .from('avatars')
+    .getPublicUrl(path);
+  if (!urlData) throw new Error('Failed to get public URL for avatar');
+  return urlData.publicUrl;
+}
+
+export async function uploadFitClipVideo(
+  file: File,
+  userId: string
+): Promise<string | null> {
+  const sb = supabaseOrNull();
+  if (!sb) return null;
+  const fileExt = file.name.split('.').pop() ?? 'mp4';
+  const path = `${userId}/${Date.now()}.${fileExt}`;
+  const { error: uploadError } = await sb
+    .storage
+    .from('fitclip-videos')
+    .upload(path, file, { upsert: false, cacheControl: '3600' });
+  if (uploadError) throw uploadError;
+  const { data: urlData } = await sb
+    .storage
+    .from('fitclip-videos')
+    .getPublicUrl(path);
+  if (!urlData) throw new Error('Failed to get public URL for fitclip video');
+  return urlData.publicUrl;
+}
+
+/* --------------------------------------------------------- social: follow + join */
+export async function joinClub(clubId: string, userId: string): Promise<void> {
+  const sb = supabaseOrNull();
+  if (!sb) return;
+  const { error } = await sb
+    .from('club_members')
+    .insert({ club_id: clubId, user_id: userId });
+  if (error) throw error;
+}
+
+export async function leaveClub(clubId: string, userId: string): Promise<void> {
+  const sb = supabaseOrNull();
+  if (!sb) return;
+  const { error } = await sb
+    .from('club_members')
+    .delete()
+    .eq('club_id', clubId)
+    .eq('user_id', userId);
+  if (error) throw error;
+}
+
+export async function fetchClubMembership(userId: string): Promise<string[]> {
+  const sb = supabaseOrNull();
+  if (!sb) return [];
+  const { data, error } = await sb
+    .from('club_members')
+    .select('club_id')
+    .eq('user_id', userId);
+  if (error) throw error;
+  return (data ?? []).map(r => r.club_id);
+}
+
+/* ------------------------------------------------------------- sessions */
 export async function signOut(): Promise<void> {
   const sb = supabaseOrNull();
   if (!sb) return;

@@ -7,7 +7,9 @@
  */
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { DEMO_CLUBS } from '../lib/data';
+import { pointsForLevel } from '../lib/data';
+import { fetchClubs, fetchLeaderboard } from '../lib/api';
+import type { Club, LeaderboardRow } from '../lib/types';
 
 interface Challenge {
   id: string;
@@ -33,10 +35,30 @@ export default function Stitch16_Club_Dashboard() {
   const navigate = useNavigate();
   const [mounted, setMounted] = useState(false);
   const [extra, setExtra] = useState<Challenge[]>([]);
+  const [clubs, setClubs] = useState<Club[]>([]);
+  const [board, setBoard] = useState<LeaderboardRow[]>([]);
+  const club = clubs[0];
+  const members = board.slice(0, 3).map((r) => {
+    const cur = pointsForLevel(r.level);
+    const next = pointsForLevel(r.level + 1);
+    const pct = next > cur
+      ? Math.min(100, Math.max(0, Math.round(((r.points - cur) / (next - cur)) * 100)))
+      : 100;
+    return { name: r.full_name, pct, id: r.user_id };
+  });
 
   useEffect(() => {
     const t = window.setTimeout(() => setMounted(true), 120);
     return () => window.clearTimeout(t);
+  }, []);
+
+  useEffect(() => {
+    fetchClubs()
+      .then(setClubs)
+      .catch(() => setClubs([]));
+    fetchLeaderboard()
+      .then(setBoard)
+      .catch(() => setBoard([]));
   }, []);
 
   function addChallenge() {
@@ -98,7 +120,7 @@ export default function Stitch16_Club_Dashboard() {
             />
           </div>
           <h1 className="font-headline-lg-mobile text-headline-lg-mobile font-bold text-on-surface">
-            {DEMO_CLUBS[0].name}
+            {club?.name ?? 'Club'}
           </h1>
         </div>
         <button
@@ -114,10 +136,10 @@ export default function Stitch16_Club_Dashboard() {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="font-headline-lg-mobile text-headline-lg-mobile font-bold text-on-surface">
-                {DEMO_CLUBS[0].name}
+                {club?.name ?? 'Club'}
               </h2>
               <p className="font-body-md text-body-md text-on-surface-variant">
-                {DEMO_CLUBS[0].description}
+                {club?.description ?? ''}
               </p>
             </div>
             <button
@@ -146,7 +168,7 @@ export default function Stitch16_Club_Dashboard() {
         <section className="grid grid-cols-3 gap-md">
           <div className="bg-surface-container-lowest soft-border rounded-xl p-md flex flex-col items-center justify-center text-center">
             <span className="font-label-sm text-label-sm text-on-surface-variant mb-xs">Total Members</span>
-            <span className="font-title-md text-title-md text-on-surface">{DEMO_CLUBS[0].member_count}</span>
+            <span className="font-title-md text-title-md text-on-surface">{club?.member_count ?? members.length}</span>
           </div>
           <div className="bg-surface-container-lowest soft-border rounded-xl p-md flex flex-col items-center justify-center text-center">
             <span className="font-label-sm text-label-sm text-on-surface-variant mb-xs">Weekly Routes</span>
@@ -184,13 +206,9 @@ export default function Stitch16_Club_Dashboard() {
             </button>
           </div>
           <div className="space-y-sm">
-            {[
-              { name: 'Alex Chen', pct: 85 },
-              { name: 'Sarah Miller', pct: 62 },
-              { name: 'Jordan Davis', pct: 45 },
-            ].map((m) => (
+            {members.map((m) => (
               <div
-                key={m.name}
+                key={m.id}
                 onClick={handleMemberClick}
                 className="flex items-center gap-md p-md bg-surface-container-lowest soft-border rounded-xl cursor-pointer transition hover:shadow-card active:scale-[0.99]"
               >

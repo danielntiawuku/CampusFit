@@ -8,8 +8,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { fetchActivityStats } from '../lib/api';
-import { DEMO_TRIPS } from '../lib/data';
+import { fetchActivityStats, fetchFitTrips } from '../lib/api';
+import type { FitTrip } from '../lib/types';
 import type { ActivityStats } from '../lib/types';
 
 /** Bars grow from 0 on mount — mirrors the Stitch chart's entrance motion. */
@@ -28,6 +28,22 @@ export default function Stitch04_Activity_Stats() {
   const { profile } = useAuth();
   const [stats, setStats] = useState<ActivityStats | null>(null);
   const [bars, setBars] = useState(BARS.map(() => 0));
+  const [trips, setTrips] = useState<FitTrip[]>([]);
+  const t0 = trips[0] ?? {
+    id: '',
+    name: 'Recent workout',
+    description: null,
+    distance_km: 0,
+    difficulty: 'easy' as const,
+    participants_count: 0,
+    cover_url: null,
+  };
+
+  useEffect(() => {
+    fetchFitTrips()
+      .then(setTrips)
+      .catch(() => setTrips([]));
+  }, []);
 
   useEffect(() => {
     fetchActivityStats().then(setStats).catch(() => undefined);
@@ -64,6 +80,7 @@ export default function Stitch04_Activity_Stats() {
 <span className="material-symbols-outlined text-[18px]">calendar_today</span>
 <span>Oct 14 - 20</span>
 </div>
+<button onClick={() => navigate('/workout')} className="text-primary font-label-md hover:underline text-[13px]">View workout schedule</button>
 </div>
 
 <div className="glass-card rounded-xl p-md">
@@ -100,7 +117,7 @@ export default function Stitch04_Activity_Stats() {
 </div>
 <div className="glass-card rounded-xl p-md flex flex-col justify-between aspect-square">
 <div className="w-10 h-10 rounded-lg bg-secondary-container/10 flex items-center justify-center text-secondary">
-<span className="material-symbols-outlined">schedule</span>
+<button type="button" onClick={() => navigate('/workout')} className="material-symbols-outlined hover:opacity-80 transition-opacity active:scale-90" aria-label="View workout schedule">schedule</button>
 </div>
 <div>
 <p className="font-label-md text-label-md text-on-surface-variant">Minutes active</p>
@@ -121,11 +138,11 @@ export default function Stitch04_Activity_Stats() {
 <img className="w-full h-full object-cover" alt="A serene outdoor university campus scene with a lush green running path winding through ancient oak trees. Soft morning sunlight filters through the leaves, creating a peaceful and energizing atmosphere. The style is bright and minimalist with natural tones, focusing on health and student wellness." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDaEgEeYZto49uJ7YjtINoQYadSVDt-8Cwje0gyGF94GmJkSKaC3zuMU9bTUUp1AemCt9jawaJ_9vI8_iOYj9g5lWMRq9-3GUARpabSrRFL8sgJoLH-rQ-Wp87pbaCDIL44Kpyq-hsa3lHICApWzyNxcJOode-JwxexgYaPxTg9h3alg11DV4fH-M9Atd_TxPcspYZyUMLd-qVC-Uy5Dr_MIFsDOh7tBfB90zp9jf4-CaXmNp7Qaj2LG-WmdopszFxyBFlAKXrDSjy1"/>
 </div>
 <div className="flex-1">
-<h4 className="font-title-md text-body-lg font-semibold">{DEMO_TRIPS[0].name}</h4>
-<p className="font-label-md text-label-md text-on-surface-variant">Yesterday • {DEMO_TRIPS[0].distance_km} km</p>
+<h4 className="font-title-md text-body-lg font-semibold">{t0.name}</h4>
+<p className="font-label-md text-label-md text-on-surface-variant">Yesterday • {t0.distance_km} km</p>
 </div>
 <div className="text-right">
-<p className="font-label-md font-bold text-primary">{DEMO_TRIPS[0].distance_km * 5.7}m</p>
+<p className="font-label-md font-bold text-primary">{t0.distance_km * 5.7}m</p>
 <span className="material-symbols-outlined text-on-surface-variant group-hover:translate-x-1 transition-transform">chevron_right</span>
 </div>
 </div>
@@ -135,7 +152,7 @@ export default function Stitch04_Activity_Stats() {
 <img className="w-full h-full object-cover" alt="A minimalist high-end university gym interior featuring sleek modern equipment and large windows looking out onto a bright green courtyard. The space is clean, organized, and illuminated by soft, diffused light, evoking a sense of focused energy and athletic discipline in a calm academic setting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDh5lqGiW8VkiQ6-4Juhtjp-MATRNM55opVp7IPCNjuCO0eVQqeeBFpt8fxECldOW2cy5FijwWEePLgO9KF-ydFtG6hmeKVUa7PT51l7EDt32_mteqE5cRxlYDPtHAYVY3CDpDUNMYU_lqT5xSsGxbpaAmUoyLvyuSgWB4WoStur2ilc4QAIfrDIBu_tMf3Kd8-78CodBrayTHJmPftn3-Uq_0IXqseuo3I5NPVlLNLvJccIXctMoE3HsS9aHKmMWG0mKz-mly2iYBf"/>
 </div>
 <div className="flex-1">
-<h4 className="font-title-md text-body-lg font-semibold">{DEMO_TRIPS[3].name}</h4>
+<h4 className="font-title-md text-body-lg font-semibold">{trips[3]?.name ?? t0.name}</h4>
 <p className="font-label-md text-label-md text-on-surface-variant">Oct 18 • Mindfulness</p>
 </div>
 <div className="text-right">

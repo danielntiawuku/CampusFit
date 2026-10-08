@@ -7,3 +7,6 @@ verify/
 *.pyc
 __pycache__/
 .temp/
+
+# Office lock files (e.g. ~$Deck.pptx)
+~$*

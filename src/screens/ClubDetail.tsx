@@ -1,6 +1,8 @@
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Icon, ScreenHeader } from '../components/ui';
-import { DEMO_CLUBS, DEMO_LEADERBOARD } from '../lib/data';
+import { fetchClubs, fetchLeaderboard } from '../lib/api';
+import type { Club, LeaderboardRow } from '../lib/types';
 
 interface Props {
   clubId: string;
@@ -8,8 +10,41 @@ interface Props {
 
 export default function ClubDetail({ clubId }: Props) {
   const navigate = useNavigate();
-  const club = DEMO_CLUBS.find(c => c.id === clubId) ?? DEMO_CLUBS[0];
-  const clubMembers = DEMO_LEADERBOARD.filter(() => true).slice(0, 8);
+  const [clubs, setClubs] = useState<Club[]>([]);
+  const [board, setBoard] = useState<LeaderboardRow[]>([]);
+
+  useEffect(() => {
+    fetchClubs()
+      .then(setClubs)
+      .catch(() => setClubs([]));
+    fetchLeaderboard()
+      .then(setBoard)
+      .catch(() => setBoard([]));
+  }, []);
+
+  const club = clubs.find((c) => c.id === clubId);
+  const clubMembers = board.slice(0, 8);
+
+  if (clubs.length === 0) {
+    return (
+      <div className="flex flex-col">
+        <ScreenHeader title="Club" onBack={() => navigate(-1)} />
+        <div className="flex flex-1 items-center justify-center py-xl">
+          <span className="material-symbols-outlined animate-spin text-[32px] text-primary-container">progress_activity</span>
+        </div>
+      </div>
+    );
+  }
+  if (!club) {
+    return (
+      <div className="flex flex-col">
+        <ScreenHeader title="Club" onBack={() => navigate(-1)} />
+        <p className="px-container-padding py-xl text-center text-on-surface-variant">
+          This club could not be found.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col">

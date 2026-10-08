@@ -1,7 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Avatar, DifficultyPill, EmptyState, Icon, ScreenHeader } from '../../components/ui';
-import { fetchCheckpoints, fetchLeaderboard, usingDemoData } from '../../lib/api';
+import { useAuth } from '../../context/AuthContext';
+import {
+  fetchCheckpoints,
+  fetchLeaderboard,
+  fetchProblemReports,
+  fetchScanCount,
+  usingDemoData,
+} from '../../lib/api';
 
 /**
  * Objective 8 — admin dashboard. Aggregates checkpoint activity, point
@@ -17,16 +24,22 @@ interface AdminStat {
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
+  const { profile } = useAuth();
   const [stats, setStats] = useState<AdminStat[]>([]);
   const [checkpoints, setCheckpoints] = useState<Awaited<ReturnType<typeof fetchCheckpoints>>>([]);
+  const [openReports, setOpenReports] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let alive = true;
-    Promise.all([fetchCheckpoints(), fetchLeaderboard()])
-      .then(([cps, board]) => {
+    Promise.all([
+      fetchCheckpoints(),
+      fetchLeaderboard(),
+      fetchScanCount().catch(() => 0),
+      fetchProblemReports().catch(() => []),
+    ])
+      .then(([cps, board, scans, reports]) => {
         if (!alive) return;
-        const scans = 1284; // rollup from checkpoint_scans (demo value)
         const issued = board.reduce((sum, row) => sum + row.points, 0);
         setStats([
           { label: 'Students', value: String(board.length || 0), icon: 'school', accent: '#1ecc8b' },
@@ -35,6 +48,7 @@ export default function AdminDashboard() {
           { label: 'Checkpoints', value: String(cps.length), icon: 'location_on', accent: '#006c47' },
         ]);
         setCheckpoints(cps);
+        setOpenReports(reports.filter(r => r.status !== 'resolved').length);
       })
       .catch(() => undefined)
       .finally(() => alive && setLoading(false));
@@ -75,6 +89,28 @@ export default function AdminDashboard() {
               </p>
               <p className="font-title-md text-title-md">{s.value}</p>
             </div>
+          ))}
+        </section>
+
+        <section className="grid grid-cols-2 gap-card-gap">
+          {[
+            { to: '/admin/reports', label: 'Problem reports', icon: 'flag' },
+            { to: '/admin/checkpoints', label: 'Checkpoints', icon: 'location_on' },
+            { to: '/admin/clubs', label: 'Clubs', icon: 'groups' },
+            { to: '/admin/students', label: 'Students', icon: 'school' },
+          ].map(item => (
+            <button
+              key={item.to}
+              type="button"
+              onClick={() => navigate(item.to)}
+              className="card flex items-center gap-sm p-md text-left transition hover:shadow-card-lg"
+            >
+              <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary-container/15 text-primary">
+                <Icon name={item.icon} size={22} />
+              </div>
+              <span className="font-label-md text-label-md font-semibold">{item.label}</span>
+              <Icon name="chevron_right" size={20} className="ml-auto text-on-surface-variant" />
+            </button>
           ))}
         </section>
 
@@ -150,14 +186,14 @@ export default function AdminDashboard() {
             <div className="flex-1">
               <p className="font-label-md text-label-md font-semibold">Problem reports</p>
               <p className="font-label-sm text-label-sm text-on-surface-variant">
-                3 open · 1 in progress
+                {openReports === null ? 'Loading…' : `${openReports} open`}
               </p>
             </div>
             <button
               type="button"
               className="grid h-10 w-10 place-items-center rounded-full hover:bg-black/5"
               aria-label="Open reports"
-              onClick={() => navigate('/help')}
+              onClick={() => navigate('/admin/reports')}
             >
               <Icon name="chevron_right" size={22} />
             </button>
@@ -165,9 +201,9 @@ export default function AdminDashboard() {
         </section>
 
         <div className="flex items-center gap-sm rounded-card bg-surface-container-low p-md">
-          <Avatar name="Ama Mensah" size={40} />
+          <Avatar name={profile?.full_name ?? 'Administrator'} size={40} />
           <p className="font-label-sm text-label-sm text-on-surface-variant">
-            Signed in as administrator · actions are audit-logged in{' '}
+            Signed in as administrator{profile?.full_name ? ` (${profile.full_name})` : ''} · actions are audit-logged in{' '}
             <span className="font-mono">checkpoint_scans</span>
           </p>
         </div>

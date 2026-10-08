@@ -243,6 +243,24 @@ export default function ScanCheckpoint() {
                     {cp.location} · <span className="font-mono">{cp.code}</span>
                   </p>
                 </div>
+                <span
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Details for ${cp.name}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/checkpoint/${cp.code}`);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.stopPropagation();
+                      navigate(`/checkpoint/${cp.code}`);
+                    }
+                  }}
+                  className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-on-surface-variant hover:bg-surface-container transition"
+                >
+                  <Icon name="info" size={18} />
+                </span>
                 <DifficultyPill level={cp.difficulty} />
                 <span className="font-label-md text-label-md font-semibold text-primary">
                   {Math.round(cp.base_points * DIFFICULTY_MULTIPLIER[cp.difficulty])}p

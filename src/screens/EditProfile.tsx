@@ -1,12 +1,9 @@
-import { useState, type FormEvent } from 'react';
+import { useState, useRef, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Alert, Avatar, ScreenHeader } from '../components/ui';
+import { Alert, Avatar, ScreenHeader, Icon } from '../components/ui';
 import { useAuth } from '../context/AuthContext';
+import { uploadAvatar } from '../lib/api';
 
-/**
- * Production screen not present in the Stitch export — built from the same
- * tokens as screens 07/15 so editing a profile feels native to the system.
- */
 const INTERESTS = [
   'Running',
   'Yoga',
@@ -29,6 +26,9 @@ export default function EditProfile() {
   const [busy, setBusy] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   function toggleInterest(label: string) {
     setInterests(prev =>
@@ -36,19 +36,36 @@ export default function EditProfile() {
     );
   }
 
+  function triggerFilePicker() {
+    fileInputRef.current?.click();
+  }
+
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
     if (busy) return;
-    setBusy(true);
     setError(null);
     try {
+      let avatarUrl = profile?.avatar_url ?? null;
+      let avatarError: string | null = null;
+      if (pendingFile && pendingFile.size > 0) {
+        const id = profile?.id;
+        if (id) {
+          try {
+            avatarUrl = (await uploadAvatar(pendingFile, id)) ?? avatarUrl;
+          } catch (err) {
+            avatarError = err instanceof Error ? err.message : 'Could not upload photo.';
+          }
+        }
+      }
       await update({
         full_name: fullName.trim() || profile?.full_name || 'Student',
         bio: bio.trim() || null,
         campus: campus.trim() || null,
         interests,
+        avatar_url: avatarUrl,
       });
-      setSaved(true);
+      if (avatarError) setError(avatarError);
+      else setSaved(true);
       window.setTimeout(() => navigate('/profile', { replace: true }), 700);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not save changes.');
@@ -71,19 +88,39 @@ export default function EditProfile() {
 
       <main className="space-y-lg px-container-padding pb-10">
         {error && <Alert>{error}</Alert>}
-        {saved && <Alert kind="success">Profile updated.</Alert>}
+        {saved && !error && <Alert kind="success">Profile updated.</Alert>}
 
         <section className="flex flex-col items-center gap-sm">
           <div className="relative">
-            <Avatar name={initials} size={96} />
+            <Avatar name={profile?.avatar_url ? '' : initials} size={96} />
             <button
               type="button"
-              onClick={() => setSaved(false)}
+              onClick={triggerFilePicker}
               className="absolute -bottom-1 -right-1 grid h-9 w-9 place-items-center rounded-full border-2 border-surface bg-primary-container text-on-primary-container shadow-sm transition active:scale-90"
               aria-label="Change photo"
             >
-              <span className="material-symbols-outlined text-[18px]">photo_camera</span>
+              {profile?.avatar_url ? (
+                <Icon name="edit" size={18} />
+              ) : (
+                <span className="material-symbols-outlined text-[18px]">photo_camera</span>
+              )}
             </button>
+            <input
+              type="file"
+              ref={fileInputRef}
+              accept="image/*"
+              className="hidden"
+              onChange={e => {
+                const file = e.currentTarget.files?.[0];
+                if (file && file.size <= 5 * 1024 * 1024) {
+                  setPendingFile(file);
+                  setSaved(false);
+                  setError(null);
+                } else {
+                  setError('Please choose an image under 5MB.');
+                }
+              }}
+            />
           </div>
           <p className="font-label-sm text-label-sm text-on-surface-variant">
             {profile?.verification_status === 'verified' ? 'Verified student' : 'Verification pending'}

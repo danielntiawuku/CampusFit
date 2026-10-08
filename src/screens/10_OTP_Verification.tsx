@@ -5,13 +5,23 @@
  * (_campusfit_screens/10_OTP_Verification.html); interactivity is wired to the app
  * (routing, auth, gamification data) in App/routes.
  */
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
 export default function Stitch10_OTP_Verification() {
+  const navigate = useNavigate();
+  const [digits, setDigits] = useState<string[]>(['', '', '', '', '', '']);
+
+  function setDigit(index: number, value: string) {
+    setDigits(prev => prev.map((d, i) => (i === index ? value.slice(-1) : d)));
+  }
+
   return (
     <>
 
 
 <header className="w-full flex justify-between items-center px-container-padding pt-xl pb-md">
-<button className="w-10 h-10 flex items-center justify-center rounded-full bg-white/50 backdrop-blur-sm border border-black/[0.05] active:scale-95 transition-transform">
+<button onClick={() => navigate(-1)} aria-label="Back" className="w-10 h-10 flex items-center justify-center rounded-full bg-white/50 backdrop-blur-sm border border-black/[0.05] active:scale-95 transition-transform">
 <span className="material-symbols-outlined text-on-background">arrow_back</span>
 </button>
 <div className="flex items-center gap-2">
@@ -30,12 +40,9 @@ export default function Stitch10_OTP_Verification() {
 </div>
 
 <div className="flex justify-between gap-2 mb-lg" id="otp-container">
-<input autoFocus={true} className="otp-input w-[48px] h-[56px] text-center text-title-md font-title-md bg-white border border-outline-variant rounded-[14px] transition-all" maxLength={1} type="text"/>
-<input className="otp-input w-[48px] h-[56px] text-center text-title-md font-title-md bg-white border border-outline-variant rounded-[14px] transition-all" maxLength={1} type="text"/>
-<input className="otp-input w-[48px] h-[56px] text-center text-title-md font-title-md bg-white border border-primary-container rounded-[14px] transition-all ring-2 ring-primary-container/10" maxLength={1} type="text"/>
-<input className="otp-input w-[48px] h-[56px] text-center text-title-md font-title-md bg-white border border-outline-variant rounded-[14px] transition-all" maxLength={1} type="text"/>
-<input className="otp-input w-[48px] h-[56px] text-center text-title-md font-title-md bg-white border border-outline-variant rounded-[14px] transition-all" maxLength={1} type="text"/>
-<input className="otp-input w-[48px] h-[56px] text-center text-title-md font-title-md bg-white border border-outline-variant rounded-[14px] transition-all" maxLength={1} type="text"/>
+{digits.map((d, i) => (
+<input key={i} autoFocus={i === 0} value={d} onChange={e => setDigit(i, e.target.value)} inputMode="numeric" aria-label={`Digit ${i + 1}`} className={`otp-input w-[48px] h-[56px] text-center text-title-md font-title-md bg-white border rounded-[14px] transition-all ${i === 2 ? 'border-primary-container ring-2 ring-primary-container/10' : 'border-outline-variant'}`} maxLength={1} type="text"/>
+))}
 </div>
 
 <div className="flex flex-col items-center gap-base mb-xl">
@@ -49,7 +56,7 @@ export default function Stitch10_OTP_Verification() {
 </div>
 
 <div className="mt-auto pb-xl flex flex-col gap-md">
-<button className="w-full h-14 bg-primary-container text-on-primary-container font-title-md text-title-md rounded-full flex items-center justify-center hover:opacity-90 active:scale-[0.98] transition-all shadow-lg shadow-primary-container/10">
+<button type="button" onClick={() => navigate('/onboarding', { replace: true })} className="w-full h-14 bg-primary-container text-on-primary-container font-title-md text-title-md rounded-full flex items-center justify-center hover:opacity-90 active:scale-[0.98] transition-all shadow-lg shadow-primary-container/10">
                 Verify
             </button>
 <p className="text-center font-label-sm text-label-sm text-on-surface-variant/60 px-lg">

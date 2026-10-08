@@ -1,6 +1,8 @@
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Icon, ScreenHeader } from '../components/ui';
-import { DEMO_TRIPS, DEMO_CLUBS } from '../lib/data';
+import { fetchClubs, fetchFitTrips } from '../lib/api';
+import type { Club, FitTrip } from '../lib/types';
 
 interface Props {
   tripId?: string;
@@ -8,7 +10,41 @@ interface Props {
 
 export default function FitTripDetail({ tripId }: Props) {
   const navigate = useNavigate();
-  const trip = (tripId ? DEMO_TRIPS.find(t => t.id === tripId) : DEMO_TRIPS[0])!;
+  const [trips, setTrips] = useState<FitTrip[]>([]);
+  const [clubs, setClubs] = useState<Club[]>([]);
+
+  useEffect(() => {
+    fetchFitTrips()
+      .then(setTrips)
+      .catch(() => setTrips([]));
+    fetchClubs()
+      .then(setClubs)
+      .catch(() => setClubs([]));
+  }, []);
+
+  const trip = tripId ? trips.find(t => t.id === tripId) : trips[0];
+
+  if (trips.length === 0) {
+    return (
+      <div className="flex flex-col">
+        <ScreenHeader title="Trip" onBack={() => navigate(-1)} />
+        <div className="flex flex-1 items-center justify-center py-xl">
+          <span className="material-symbols-outlined animate-spin text-[32px] text-primary-container">progress_activity</span>
+        </div>
+      </div>
+    );
+  }
+  if (!trip) {
+    return (
+      <div className="flex flex-col">
+        <ScreenHeader title="Trip" onBack={() => navigate(-1)} />
+        <p className="px-container-padding py-xl text-center text-on-surface-variant">
+          This trip could not be found.
+        </p>
+      </div>
+    );
+  }
+
 
   const icons: Record<string, string> = {
     easy: 'wc',
@@ -91,7 +127,7 @@ export default function FitTripDetail({ tripId }: Props) {
             </button>
           </div>
           <div className="space-y-sm">
-            {DEMO_CLUBS.slice(0, 3).map((club) => (
+            {clubs.slice(0, 3).map((club) => (
               <button
                 key={club.id}
                 type="button"

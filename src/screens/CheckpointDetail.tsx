@@ -1,6 +1,9 @@
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Icon, DifficultyPill, ScreenHeader } from '../components/ui';
-import { DEMO_CHECKPOINTS, DIFFICULTY_MULTIPLIER } from '../lib/data';
+import { fetchCheckpoints } from '../lib/api';
+import { DIFFICULTY_MULTIPLIER } from '../lib/data';
+import type { Checkpoint } from '../lib/types';
 
 interface Props {
   checkpointCode?: string;
@@ -8,16 +11,46 @@ interface Props {
 
 export default function CheckpointDetail({ checkpointCode }: Props) {
   const navigate = useNavigate();
-  const checkpoint = (checkpointCode
-    ? DEMO_CHECKPOINTS.find(c => c.code.toUpperCase() === checkpointCode.toUpperCase())
-    : DEMO_CHECKPOINTS[0])!;
+  const [all, setAll] = useState<Checkpoint[]>([]);
 
-  const nearby = DEMO_CHECKPOINTS
-    .filter(c => c.id !== checkpoint.id)
+  useEffect(() => {
+    void fetchCheckpoints().then(setAll);
+  }, []);
+
+  const checkpoint = checkpointCode
+    ? all.find(c => c.code.toUpperCase() === checkpointCode.toUpperCase())
+    : all[0];
+
+  const nearby = all
+    .filter(c => c.id !== checkpoint?.id)
     .sort(() => Math.random() - 0.5)
     .slice(0, 4);
 
-  const points = Math.round(checkpoint.base_points * DIFFICULTY_MULTIPLIER[checkpoint.difficulty]);
+  const points = checkpoint
+    ? Math.round(checkpoint.base_points * DIFFICULTY_MULTIPLIER[checkpoint.difficulty])
+    : 0;
+
+  if (all.length === 0) {
+    return (
+      <div className="flex flex-col">
+        <ScreenHeader title="Checkpoint" onBack={() => navigate(-1)} />
+        <div className="flex flex-1 items-center justify-center py-xl">
+          <span className="material-symbols-outlined animate-spin text-[32px] text-primary-container">progress_activity</span>
+        </div>
+      </div>
+    );
+  }
+  if (!checkpoint) {
+    return (
+      <div className="flex flex-col">
+        <ScreenHeader title="Checkpoint" onBack={() => navigate(-1)} />
+        <p className="px-container-padding py-xl text-center text-on-surface-variant">
+          This checkpoint could not be found.
+        </p>
+      </div>
+    );
+  }
+
 
   return (
     <div className="flex flex-col">

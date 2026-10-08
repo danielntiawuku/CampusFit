@@ -141,7 +141,7 @@ export default function Stitch14_FitTrip_Explorer_Search() {
             {trips.map(trip => (
               <div
                 key={trip.id}
-                onClick={() => navigate('/explore/map')}
+                onClick={() => navigate(`/trip/${trip.id}`)}
                 className="kinetic-card bg-surface-container-lowest p-md rounded-xl border border-black/5 flex flex-col items-center text-center cursor-pointer"
               >
                 <div className="w-14 h-14 rounded-full bg-primary-fixed-dim flex items-center justify-center mb-sm">
@@ -153,7 +153,13 @@ export default function Stitch14_FitTrip_Explorer_Search() {
                 <p className="text-on-surface-variant font-label-sm text-label-sm mb-md">
                   {trip.distance_km} km · {trip.difficulty}
                 </p>
-                <button className="w-full py-1.5 bg-secondary-container text-on-secondary-fixed font-label-md text-label-sm rounded-full active:scale-95 transition-transform">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate('/explore/map');
+                  }}
+                  className="w-full py-1.5 bg-secondary-container text-on-secondary-fixed font-label-md text-label-sm rounded-full active:scale-95 transition-transform"
+                >
                   Start
                 </button>
               </div>

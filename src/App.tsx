@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation, useParams } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import BottomNav from './components/BottomNav';
 import { useAuth } from './context/AuthContext';
@@ -33,12 +33,47 @@ import AdminDashboard from './screens/gamification/AdminDashboard';
 
 // --- Production screens missing from the Stitch export (same design system) -
 import Notifications from './screens/Notifications';
+import NotificationDetail from './screens/NotificationDetail';
 import ForgotPassword from './screens/ForgotPassword';
 import EditProfile from './screens/EditProfile';
 import RecordClip from './screens/RecordClip';
 import Privacy from './screens/Privacy';
-/* detail screens are routed by their parent screens via links/buttons;
-   the imports are kept here to ensure the modules are compiled in. */
+import ChallengesDashboard from './screens/ChallengesDashboard';
+import WorkoutSchedule from './screens/WorkoutSchedule';
+import AdminReports from './screens/AdminReports';
+import AdminCheckpoints from './screens/AdminCheckpoints';
+import AdminClubs from './screens/AdminClubs';
+import AdminStudents from './screens/AdminStudents';
+import MapboxDashboard from './screens/MapboxDashboard';
+
+// --- Detail screens (reached by tapping cards in the list screens) --------
+import ClubDetail from './screens/ClubDetail';
+import CheckpointDetail from './screens/CheckpointDetail';
+import FitClipDetail from './screens/FitClipDetail';
+import FitTripDetail from './screens/FitTripDetail';
+import WorkoutDetail from './screens/WorkoutDetail';
+
+/** Detail screens take a single id prop — map it from the URL. */
+function ClubDetailRoute() {
+  const { id } = useParams<{ id: string }>();
+  return <ClubDetail clubId={id ?? ''} />;
+}
+function CheckpointDetailRoute() {
+  const { code } = useParams<{ code: string }>();
+  return <CheckpointDetail checkpointCode={code} />;
+}
+function FitClipDetailRoute() {
+  const { id } = useParams<{ id: string }>();
+  return <FitClipDetail clipId={id ?? ''} />;
+}
+function FitTripDetailRoute() {
+  const { id } = useParams<{ id: string }>();
+  return <FitTripDetail tripId={id ?? ''} />;
+}
+function WorkoutDetailRoute() {
+  const { id } = useParams<{ id: string }>();
+  return <WorkoutDetail tripId={id} />;
+}
 
 /** Routes reachable without an account. */
 const PUBLIC_ROUTES = [
@@ -49,6 +84,7 @@ const PUBLIC_ROUTES = [
   '/otp',
   '/onboarding',
   '/logo',
+  '/privacy',
 ];
 
 function RequireAuth({ children }: { children: ReactNode }) {
@@ -77,29 +113,41 @@ export default function App() {
   const location = useLocation();
   const isPublic = PUBLIC_ROUTES.includes(location.pathname);
   // Screens with their own back-button header don't show the tab bar.
+  const NO_NAV = [
+    '/settings',
+    '/help',
+    '/report',
+    '/report/done',
+    '/verify',
+    '/otp',
+    '/onboarding',
+    '/stats',
+    '/clubs',
+    '/leaderboard',
+    '/badges',
+    '/admin',
+    '/explore/map',
+    '/explore/search',
+    '/notifications',
+    '/edit-profile',
+    '/privacy',
+    '/record',
+    '/forgot-password',
+  ];
+  // Pushed stack views (detail screens) hide the tab bar too.
+  const DETAIL_PREFIXES = [
+    '/notifications/',
+    '/clubs/',
+    '/trip/',
+    '/clip/',
+    '/checkpoint/',
+    '/workout/',
+    '/admin/',
+  ];
   const showNav =
     !isPublic &&
-    ![
-      '/settings',
-      '/help',
-      '/report',
-      '/report/done',
-      '/verify',
-      '/otp',
-      '/onboarding',
-      '/stats',
-      '/clubs',
-      '/leaderboard',
-      '/badges',
-      '/admin',
-      '/explore/map',
-      '/explore/search',
-      '/notifications',
-      '/edit-profile',
-      '/privacy',
-      '/record',
-      '/forgot-password',
-    ].includes(location.pathname);
+    !NO_NAV.includes(location.pathname) &&
+    !DETAIL_PREFIXES.some((p) => location.pathname.startsWith(p));
 
   return (
     <div className="app-frame">
@@ -130,15 +178,30 @@ export default function App() {
           <Route path="/report" element={<RequireAuth><ReportProblem /></RequireAuth>} />
           <Route path="/report/done" element={<RequireAuth><SubmissionSuccess /></RequireAuth>} />
           <Route path="/notifications" element={<RequireAuth><Notifications /></RequireAuth>} />
+          <Route path="/notifications/:id" element={<RequireAuth><NotificationDetail /></RequireAuth>} />
           <Route path="/edit-profile" element={<RequireAuth><EditProfile /></RequireAuth>} />
-          <Route path="/privacy" element={<RequireAuth><Privacy /></RequireAuth>} />
+          <Route path="/privacy" element={<Privacy />} />
           <Route path="/record" element={<RequireAuth><RecordClip /></RequireAuth>} />
 
           {/* --------------------------------------- thesis gamification loop */}
           <Route path="/scan" element={<RequireAuth><ScanCheckpoint /></RequireAuth>} />
           <Route path="/leaderboard" element={<RequireAuth><Leaderboard /></RequireAuth>} />
-          <Route path="/badges" element={<RequireAuth><BadgeShelf /></RequireAuth>} />
-          <Route path="/admin" element={<RequireAuth><AdminDashboard /></RequireAuth>} />
+          <Route path="/badges" element={<RequireAuth><BadgeShelf /></RequireAuth>} />          <Route path="/admin" element={<RequireAuth><AdminDashboard /></RequireAuth>} />
+          <Route path="/admin/reports" element={<RequireAuth><AdminReports /></RequireAuth>} />
+          <Route path="/admin/checkpoints" element={<RequireAuth><AdminCheckpoints /></RequireAuth>} />
+          <Route path="/admin/clubs" element={<RequireAuth><AdminClubs /></RequireAuth>} />
+          <Route path="/admin/students" element={<RequireAuth><AdminStudents /></RequireAuth>} />
+          <Route path="/admin/qr" element={<RequireAuth><AdminCheckpoints /></RequireAuth>} />
+          <Route path="/challenges" element={<RequireAuth><ChallengesDashboard /></RequireAuth>} />
+          <Route path="/workout" element={<RequireAuth><WorkoutSchedule /></RequireAuth>} />
+          <Route path="/map" element={<RequireAuth><MapboxDashboard /></RequireAuth>} />
+
+          {/* ------------------------------------------------- detail screens */}
+          <Route path="/clubs/:id" element={<RequireAuth><ClubDetailRoute /></RequireAuth>} />
+          <Route path="/checkpoint/:code" element={<RequireAuth><CheckpointDetailRoute /></RequireAuth>} />
+          <Route path="/clip/:id" element={<RequireAuth><FitClipDetailRoute /></RequireAuth>} />
+          <Route path="/trip/:id" element={<RequireAuth><FitTripDetailRoute /></RequireAuth>} />
+          <Route path="/workout/:id" element={<RequireAuth><WorkoutDetailRoute /></RequireAuth>} />
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

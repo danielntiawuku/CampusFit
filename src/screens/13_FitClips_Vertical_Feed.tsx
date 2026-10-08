@@ -5,8 +5,10 @@
  * (_campusfit_screens/13_FitClips_Vertical_Feed.html); interactivity is wired to the app
  * (routing, auth, gamification data) in App/routes.
  */
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { fetchFitClips } from '../lib/api';
+import type { FitClip } from '../lib/types';
 
 /** Play/pause overlay for a clip. */
 function ClipPlay() {
@@ -63,6 +65,11 @@ function ClipLike({ initial }: { initial: number }) {
 
 export default function Stitch13_FitClips_Vertical_Feed() {
   const navigate = useNavigate();
+  const [clips, setClips] = useState<FitClip[]>([]);
+
+  useEffect(() => {
+    void fetchFitClips().then(setClips).catch(() => setClips([]));
+  }, []);
 
   return (
     <div className="feed-screen min-h-[100dvh]">
@@ -88,6 +95,61 @@ export default function Stitch13_FitClips_Vertical_Feed() {
 
 <main className="video-feed px-container-padding pb-xl">
 <div className="flex flex-col gap-md">
+
+{clips.map((clip) => (
+  <section
+    key={clip.id}
+    onClick={() => navigate(`/clip/${clip.id}`)}
+    className="video-card relative w-full h-[618px] rounded-[20px] overflow-hidden bg-surface-container-highest/5 border border-white/5 cursor-pointer"
+  >
+    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/80 z-10"></div>
+    <div className="absolute inset-0 flex items-center justify-center glow-green">
+      <div className="w-full h-full bg-[#0E1210] relative">
+        {clip.video_url ? (
+          <video
+            className="w-full h-full object-cover opacity-60"
+            src={clip.video_url}
+            poster={clip.thumbnail_url ?? undefined}
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+          />
+        ) : clip.thumbnail_url ? (
+          <img
+            className="w-full h-full object-cover opacity-60"
+            alt={clip.caption}
+            src={clip.thumbnail_url}
+          />
+        ) : (
+          <div className="w-full h-full bg-[#0E1210]"></div>
+        )}
+      </div>
+    </div>
+    <ClipPlay />
+    <div className="absolute bottom-0 left-0 w-full p-md z-20 flex justify-between items-end">
+      <div className="flex flex-col gap-xs max-w-[70%]">
+        <div className="flex items-center gap-xs">
+          <div className="w-8 h-8 rounded-full border border-white/20 overflow-hidden bg-surface-container">
+            {clip.author?.avatar_url && (
+              <img className="w-full h-full object-cover" alt="" src={clip.author.avatar_url} />
+            )}
+          </div>
+          <span className="font-label-md text-label-md text-white">
+            @{(clip.author?.full_name ?? 'student').toLowerCase().replace(/\s+/g, '_')}
+          </span>
+        </div>
+        <p className="font-body-md text-body-md text-white/90 line-clamp-2">{clip.caption}</p>
+      </div>
+      <div className="flex flex-col items-center gap-xs">
+        <ClipLike initial={clip.likes_count} />
+      </div>
+    </div>
+  </section>
+))}
+{clips.length === 0 && (
+<>
 
 <section className="video-card relative w-full h-[618px] rounded-[20px] overflow-hidden bg-surface-container-highest/5 border border-white/5">
 <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/80 z-10"></div>
@@ -183,6 +245,8 @@ export default function Stitch13_FitClips_Vertical_Feed() {
 </div>
 </div>
 </section>
+</>
+)}
 </div>
 </main>
 
