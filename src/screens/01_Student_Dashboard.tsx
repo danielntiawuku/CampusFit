@@ -22,7 +22,7 @@ const QUICK_LINKS: { to: string; label: string; icon: string; tint: string }[] =
   { to: '/challenges', label: 'Challenges', icon: 'emoji_events', tint: 'bg-secondary-container/15 text-secondary' },
   { to: '/leaderboard', label: 'Ranking', icon: 'leaderboard', tint: 'bg-tertiary-container/15 text-tertiary' },
   { to: '/badges', label: 'Badges', icon: 'workspace_premium', tint: 'bg-primary-container/15 text-primary' },
-  { to: '    /record', label: 'Record clip', icon: 'videocam', tint: 'bg-secondary-container/15 text-secondary' },
+  { to: '/record', label: 'Record clip', icon: 'videocam', tint: 'bg-secondary-container/15 text-secondary' },
 ];
 
 export default function Stitch01_Student_Dashboard() {
@@ -70,6 +70,9 @@ export default function Stitch01_Student_Dashboard() {
   // Prefer steps counted on this device today; fall back to the profile stats.
   const steps = deviceSteps > 0 ? deviceSteps : stats?.steps ?? 0;
   const goalPct = Math.round((steps / (stats?.step_goal ?? 10000)) * 100);
+  // Show the signed-in user's first name. Only fall back to 'Student' when there
+  // is no signed-in profile (e.g. auth not loaded yet / no profile row), so the
+  // greeting never shows a stray value like 'Project'.
   const firstName = profile?.full_name?.split(' ')[0] ?? 'Student';
   return (
     <>

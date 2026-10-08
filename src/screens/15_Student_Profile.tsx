@@ -8,14 +8,23 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { fetchClubMembership, fetchClubs, fetchLeaderboard } from '../lib/api';
-import type { Club } from '../lib/types';
+import { fetchClubMembership, fetchClubs, fetchFitClips, fetchLeaderboard } from '../lib/api';
+import type { Club, FitClip } from '../lib/types';
 
 export default function Stitch15_Student_Profile() {
   const navigate = useNavigate();
   const { profile } = useAuth();
   const [rank, setRank] = useState<number | null>(null);
   const [club, setClub] = useState<Club | null>(null);
+  const [clips, setClips] = useState<FitClip[]>([]);
+
+  useEffect(() => {
+    if (profile) {
+      fetchFitClips()
+        .then(all => setClips(all.filter(c => c.user_id === profile.id)))
+        .catch(() => setClips([]));
+    }
+  }, [profile]);
 
   useEffect(() => {
     fetchLeaderboard()
@@ -47,8 +56,7 @@ export default function Stitch15_Student_Profile() {
 <header className="w-full top-0 sticky z-40 bg-background/80 backdrop-blur-md flex items-center justify-between px-container-padding py-xs">
 <div className="flex items-center gap-md">
 <button type="button" onClick={() => navigate('/home')} className="material-symbols-outlined text-on-surface-variant hover:opacity-80 transition-opacity active:scale-95 transition-transform p-xs" aria-label="Go to home">menu</button>
-</div>
-<h1 className="font-headline-lg-mobile text-headline-lg-mobile font-bold text-primary">Profile</h1>
+</div>          <h1 className="font-headline-lg-mobile text-headline-lg-mobile font-bold text-primary">Profile</h1>
 <div className="flex items-center gap-md">
 <span onClick={() => navigate('/settings')} className="material-symbols-outlined text-on-surface-variant hover:opacity-80 transition-opacity active:scale-95 transition-transform cursor-pointer">settings</span>
 </div>
@@ -132,54 +140,43 @@ export default function Stitch15_Student_Profile() {
 <span className="material-symbols-outlined text-[20px]">add</span>
 </button>
 <button onClick={() => navigate('/clips')} className="flex items-center gap-xs">
-<h3 className="font-title-md text-title-md text-on-background">My FitClips</h3>
+<h3 className="font-title-md text-title-md text-on-background">My clips</h3>
 <span className="material-symbols-outlined text-on-surface-variant">grid_view</span>
 </button>
 </div>
 </div>
 <div onClick={() => navigate('/clips')} className="grid grid-cols-3 gap-base cursor-pointer">
-
+{clips.length === 0 ? (
+<>
 <div className="aspect-square bg-inverse-surface rounded-lg relative overflow-hidden group cursor-pointer">
-<img className="w-full h-full object-cover opacity-60" alt="A dynamic action shot from a first-person perspective of a morning run through a sun-drenched university campus, warm golden hour lighting, cinematic motion blur, deep charcoal and vibrant green highlights." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBgcegqjCX95emYYGSvbnbNQIM9schRIdlDORJZodfQk4AXmDBMW7nb3JMxGN0h9rrk1wNRIsItJUjpRs9MPM4H98MuVk4ZVX_NfxKqqrMerF6NP9l49cQTJzQoqDj-YMbZfTG8JQRHNEc6Mqz8NKXHcWEC--aVdenA3W6ufw9LbPnjaE_PWfdr2NeV19c-05R-4lIbaBDDcJa34JFH3QNpD7d3VNojiiM98B1h5OM4sOLdRfFIJ7ILxFE0DxyoIWXik_Wesv1e_WSD"/>
+<img className="w-full h-full object-cover opacity-60" alt="" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBgcegqjCX95emYYGSvbnbNQIM9schRIdlDORJZodfQk4AXmDBMW7nb3JMxGN0h9rrk1wNRIsItJUjpRs9MPM4H98MuVk4ZVX_NfxKqqrMerF6NP9l49cQTJzQoqDj-YMbZfTG8JQRHNEc6Mqz8NKXHcWEC--aVdenA3W6ufw9LbPnjaE_PWfdr2NeV19c-05R-4lIbaBDDcJa34JFH3QNpD7d3VNojiiM98B1h5OM4sOLdRfFIJ7ILxFE0DxyoIWXik_Wesv1e_WSD"/>
 <div className="absolute inset-0 flex items-center justify-center">
 <span className="material-symbols-outlined text-white text-[32px] opacity-80 group-active:scale-90 transition-transform">play_circle</span>
 </div>
 </div>
-
 <div className="aspect-square bg-inverse-surface rounded-lg relative overflow-hidden group cursor-pointer">
-<img className="w-full h-full object-cover opacity-60" alt="A stylized overhead view of colorful yoga mats arranged in a minimalist university hall, soft diffuse lighting, warm cream background with mint green accents, high-quality digital aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA9NT5H3nt0KkSC0Lj1kXo_XwMw-3mpOgh7y71NExjq0hWZan_TP-qlujlvAi-CuXGiok-mMJ3HSL7hIBzpGnTV08--bI_b02JdDZuAVsb5eoZ0fDvie8WaZguAVrVSrsYeT763e3BfiCqFl1l-bf2-oOiXCtjdF3isFpRLP4B4fGGd4ZW6gYXZahSkhZoRlriYtASyiwm4ZDH48HKue8rhXIf3wL4ioOmfAD8HFpB9rI85VjLIm8P_3T5GHHe-qdKWMYzwqWzJaleG"/>
+<img className="w-full h-full object-cover opacity-60" alt="" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA9NT5H3nt0KkSC0Lj1kXo_XwMw-3mpOgh7y71NExjq0hWZan_TP-qlujlvAi-CuXGiok-mMJ3HSL7hIBzpGnTV08--bI_b02JdDZuAVsb5eoZ0fDvie8WaZguAVrVSrsYeT763e3BfiCqFl1l-bf2-oOiXCtjdF3isFpRLP4B4fGGd4ZW6gYXZahSkhZoRlriYtASyiwm4ZDH48HKue8rhXIf3wL4ioOmfAD8HFpB9rI85VjLIm8P_3T5GHHe-qdKWMYzwqWzJaleG"/>
 <div className="absolute inset-0 flex items-center justify-center">
 <span className="material-symbols-outlined text-white text-[32px] opacity-80 group-active:scale-90 transition-transform">play_circle</span>
 </div>
 </div>
-
 <div className="aspect-square bg-inverse-surface rounded-lg relative overflow-hidden group cursor-pointer">
-<img className="w-full h-full object-cover opacity-60" alt="A close-up of high-performance sneakers on a textured dark asphalt path with a painted white line, dramatic side lighting, minimalist athletic vibe, deep charcoal and crisp white palette." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC_SACt0npmD4Kmhv_tlmnRhOtjBigUFHXD4Grb2aX13oFR6LFa4R4zbMjfvx3XifZUYA06paOtWYszXj2JVnjL8IfqDDAhvgxn2M0NR2_6HU4mVEYw0KBKqcf9NwzK3pxfxFeqSYcYdA7ay8Pul75fOUN2J5BD5BW9C3DCzXcG06YdtKnONRgz4V9hqusMT_utdNJxeGR95j3zqJdPn3khCpH0a2g50s4G-46ujDMbo0AZ822YNR5Gyn0B7JwdoV0j-vLDyGwb_1MU"/>
+<img className="w-full h-full object-cover opacity-60" alt="" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC_SACt0npmD4Kmhv_tlmnRhOtjBigUFHXD4Grb2aX13oFR6LFa4R4zbMjfvx3XifZUYA06paOtWYszXj2JVnjL8IfqDDAhvgxn2M0NR2_6HU4mVEYw0KBKqcf9NwzK3pxfxFeqSYcYdA7ay8Pul75fOUN2J5BD5BW9C3DCzXcG06YdtKnONRgz4V9hqusMT_utdNJxeGR95j3zqJdPn3khCpH0a2g50s4G-46ujDMbo0AZ822YNR5Gyn0B7JwdoV0j-vLDyGwb_1MU"/>
 <div className="absolute inset-0 flex items-center justify-center">
 <span className="material-symbols-outlined text-white text-[32px] opacity-80 group-active:scale-90 transition-transform">play_circle</span>
 </div>
 </div>
-
-<div className="aspect-square bg-inverse-surface rounded-lg relative overflow-hidden group cursor-pointer">
-<img className="w-full h-full object-cover opacity-60" alt="An artistic blurred shot of a student cyclist moving through a modern campus archway, lens flare, bright high-key lighting, professional minimalist sport photography style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBeLGyRS10KpDCt-tOFc0nVGyVosJaipeQmySquhcLuzGDQ1KnWI60lSnHRAPTmmc_dPW2qkmzQlkPu-wjHRtZMy6nNjnkL6nS-PIxI1-mxoSGPSGNG0tIqjFnmSremhgEw6GoyslMYLqcOQlh9DFANM9TQWL-eTmG1Q7TRdnUTJfR3_5YvbVMpTysE-UiDTaWTl9ilaG37tgidWnDWNkt6TiSKYZ7ZqPOSFjEcGu-vX3j0fYctN9rVS_zBa8UVAwKu6SqOn0dZodzL"/>
+</>
+) : (
+clips.slice(0, 9).map(clip => (
+<div key={clip.id} onClick={() => navigate(`/clip/${clip.id}`)} className="aspect-square bg-inverse-surface rounded-lg relative overflow-hidden group cursor-pointer">
+<video className="w-full h-full object-cover" src={clip.video_url} poster={clip.thumbnail_url ?? undefined} />
 <div className="absolute inset-0 flex items-center justify-center">
 <span className="material-symbols-outlined text-white text-[32px] opacity-80 group-active:scale-90 transition-transform">play_circle</span>
 </div>
 </div>
-
-<div className="aspect-square bg-inverse-surface rounded-lg relative overflow-hidden group cursor-pointer">
-<img className="w-full h-full object-cover opacity-60" alt="A minimalist capture of a heart-rate monitor display glowing in a dark gym environment, neon mint green line on a deep charcoal screen, futuristic fitness tech aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDXA5dB49bEVBTVFMBJslffBvo357vbo3s4iXvpC8outMG0aw_Mvamo0TxSg48YFhVl1DrrMmh30wIwmfT08A2W6ciDxWFIshw_DnyWq35HTNrtNWpaT0AhrOWGRs1LtDqtrlVdSrtLu1JVaYkrVexkp02uc99umOs85YZ033xe3hDHkjrO4WtCA3Q2ScYTnc6IWwmoFCQksQDpK3OPVZWjCmLzadRGzk7eZhhCvdY_5HTLv6MYhtjY2nsxDZg5HMJJXdhwM3eCIJf1"/>
-<div className="absolute inset-0 flex items-center justify-center">
-<span className="material-symbols-outlined text-white text-[32px] opacity-80 group-active:scale-90 transition-transform">play_circle</span>
-</div>
-</div>
-
-<div className="aspect-square bg-inverse-surface rounded-lg relative overflow-hidden group cursor-pointer">
-<img className="w-full h-full object-cover opacity-60" alt="A serene wide shot of a university courtyard at dawn with mist and soft purple sky, minimalist tranquil campus setting, high-end photography mood, professional digital art." src="https://lh3.googleusercontent.com/aida-public/AB6AXuADKRjndwV5QDyonljo1mFCWX32bknovwJnd4hxAuFFXxBU93jgQrstXFwhvqAfnqo3Csg9Q0ly7xAkjbTQcdcUqn7ArqjA4avBnC6gQA2Bal5YuyPs5367mx5lrkO01csVMXBhjh5zApkj1Mny7ZkOVYRgtzBPSpcezHCfsYfFlErJFpf4Uy_WHxwf0onFgEHn_nj_Rkuer-zA2BsKh1dsUw-MG4bSPWjrOqk1YJgoKLEtesYloFsCzcWlcb78ixPCRS7Y5fOtKtQJ"/>
-<div className="absolute inset-0 flex items-center justify-center">
-<span className="material-symbols-outlined text-white text-[32px] opacity-80 group-active:scale-90 transition-transform">play_circle</span>
-</div>
-</div>
+))
+)}
 </div>
 </section>
 </main>
